@@ -352,7 +352,7 @@ function migrateNames(){
 }
 function normalize(){
  migrateNames();
-  if(state.effects===undefined)state.effects=70;if(state.voice===undefined)state.voice=true;
+  if(state.effects===undefined)state.effects=70;
   state.clock=Number.isSafeInteger(state.clock)?Math.max(0,state.clock):0;
   state.yearStart=Number.isInteger(state.yearStart)?state.yearStart:2024;
   state.progress??={};
@@ -1680,7 +1680,7 @@ showTitle(`<div class="shp-sub"><h3>公式からのお知らせ</h3><p>本作は
 function titleLegal(kind){
 titleSlotKeep=Number($('slotChoice')?.value)||activeSlot;
 const privacy=kind==='privacy';
-showTitle(`<div class="shp-sub"><h3>${privacy?'プライバシーポリシー':'利用規約'}</h3>${privacy?`<p>本ゲームは、サービスを終了した『スターホースポケット＋』（©SEGA）を個人が趣味の範囲でオフライン再現した非公式作品です。公開・配布は行いません。</p><p>本ゲームは個人情報の収集・送信を一切行いません。セーブデータはお使いのブラウザ内（localStorage）にのみ保存され、外部サーバーへ送信されることはありません。</p><p>プレイヤーIDは端末内で生成される表示専用の文字列で、個人を特定するものではありません。</p>`:`<p>本ゲームは個人制作のオフライン専用ゲームです。プレイにあたって料金は発生しません。</p><p>セーブデータの管理は利用者ご自身の責任で行ってください。ブラウザのデータを削除するとセーブデータも消えます。大切なデータは「データ引継ぎ」からバックアップを書き出してください。</p><p>本ゲームはSEGA公式とは関係のない非公式の再現作品です。</p><h3 style="margin-top:18px">音源クレジット</h3><p style="font-size:13px;line-height:1.6">秘書ボイス・実況：Kokoro-82M（hexgrad, Apache-2.0）で生成<br>蹄音：Alan McKinney（alanmcki）“Galloping” CC BY 3.0<br>歓声：Gregor Quendel “Free Crowd Cheering Sounds” CC BY 4.0<br>拍手・ファンファーレ・カード・コイン・操作音ほか：OpenGameArt / Kenney ほか CC0<br>詳細は同梱の CREDITS.md を参照。</p>`}<button type="button" class="shp-back" onclick="titleScreen()">← タイトルに戻る</button></div>`);
+showTitle(`<div class="shp-sub"><h3>${privacy?'プライバシーポリシー':'利用規約'}</h3>${privacy?`<p>本ゲームは、サービスを終了した『スターホースポケット＋』（©SEGA）を個人が趣味の範囲でオフライン再現した非公式作品です。公開・配布は行いません。</p><p>本ゲームは個人情報の収集・送信を一切行いません。セーブデータはお使いのブラウザ内（localStorage）にのみ保存され、外部サーバーへ送信されることはありません。</p><p>プレイヤーIDは端末内で生成される表示専用の文字列で、個人を特定するものではありません。</p>`:`<p>本ゲームは個人制作のオフライン専用ゲームです。プレイにあたって料金は発生しません。</p><p>セーブデータの管理は利用者ご自身の責任で行ってください。ブラウザのデータを削除するとセーブデータも消えます。大切なデータは「データ引継ぎ」からバックアップを書き出してください。</p><p>本ゲームはSEGA公式とは関係のない非公式の再現作品です。</p><h3 style="margin-top:18px">音源クレジット</h3><p style="font-size:13px;line-height:1.6">蹄音：Alan McKinney（alanmcki）“Galloping” CC BY 3.0<br>歓声：Gregor Quendel “Free Crowd Cheering Sounds” CC BY 4.0<br>拍手・ファンファーレ・カード・コイン・操作音ほか：OpenGameArt / Kenney ほか CC0<br>詳細は同梱の CREDITS.md を参照。</p>`}<button type="button" class="shp-back" onclick="titleScreen()">← タイトルに戻る</button></div>`);
 }
 function titleTransfer(){
 titleSlotKeep=Number($('slotChoice')?.value)||activeSlot;
@@ -2427,6 +2427,8 @@ function showRace(replay){
 
 /* ===== 第12弾：実録音の効果音・秘書ボイス・実況（assets/audio/）。読み込めない環境では従来の合成音・端末音声に戻る ===== */
 const AUDIO_BASE='assets/audio/',audioBroken=new Set(),audioCache={};
+// 声の音声ファイル（assets/audio/voice/）を使うか。false の間は従来どおり端末の読み上げで話す
+const VOICE_FILES=false;
 function audioBase(path){let a=audioCache[path];if(!a){a=new Audio(window.AUDIO_PACK?.[path]||AUDIO_BASE+path);a.preload='auto';audioCache[path]=a}return a}
 // 再生できたら Audio を返す。ファイル欠落時は fallback を呼ぶ（初回の失敗は error イベントで検知）
 function playFile(path,volume,fallback,loop=false){
@@ -2481,7 +2483,7 @@ function raceCall(phase,positions,lanes,leader,t,finish,speed){
  const numberOf=v=>{const i=lanes.indexOf(v);return Math.min(18,Math.max(1,Number(v?.number)||i+1))};
  const leadV=lanes.find(v=>v.name===leader);
  const fallback=()=>{const runner=leadV;try{sayLocal(phase+'、'+(runner?.reading||leader)+(t===1?'が優勝です':'が先頭です'))}catch{}};
- if(audioBroken.has('voice/commentary/start.mp3')){fallback();return}
+ if(!VOICE_FILES||audioBroken.has('voice/commentary/start.mp3')){fallback();return}
  const lead='lead'+numberOf(leadV);
  let ok=true;
  if(phase==='発走')ok=sayCall('start',true);
@@ -2638,7 +2640,7 @@ const secCalm=['状態は維持できています。焦らずいきましょう'
 const secBirth=['生まれましたよ！　とっても元気な仔です','やったー！　新しい仔馬の誕生だよ！','生まれました……。すくすく育ちますように','いい仔ね。これからが楽しみだわ','わあ、生まれたー！　おめでとう！'];
 function secVoice(text){
  if(!state.voice||!text)return;
- const clip=secVoiceClip(text);
+ const clip=VOICE_FILES&&secVoiceClip(text);
  if(clip&&playVoice(clip,()=>secVoiceTTS(text)))return;
  secVoiceTTS(text);
 }
@@ -2922,7 +2924,7 @@ function lineagePage(id){
 }
 function optControls(){
  return `<fieldset><legend>観戦・育成設定</legend><label>秘書<select aria-label="秘書" onchange="state.secretary=Number(this.value);save()">${secretaries.map((x,i)=>`<option value="${i}" ${i===(state.secretary||0)?'selected':''}>${x}</option>`).join('')}</select></label>
- <label><input type="checkbox" ${state.voice?'checked':''} onchange="state.voice=this.checked;save()">秘書ボイス・実況</label>
+ <label><input type="checkbox" ${state.voice?'checked':''} onchange="state.voice=this.checked;save()">端末内の日本語音声で実況</label>
  <label>音量<input type="range" min="0" max="100" value="${Number(state.voiceVolume??75)}" onchange="state.voiceVolume=Number(this.value);save()"></label>
  <label>牧場BGM<input type="range" min="0" max="100" value="${Number(state.music||0)}" onchange="state.music=Number(this.value);save();playAudio()"></label><label>操作音<input type="range" min="0" max="100" value="${Number(state.effects||0)}" onchange="state.effects=Number(this.value);save();playAudio()"></label><label>競走画質<select onchange="state.qualityMode=this.value;save()">${['標準','省電力'].map(k=>`<option ${state.qualityMode===k?'selected':''}>${k}</option>`).join('')}</select></label><label><input type="checkbox" ${state.skipCare?'checked':''} onchange="state.skipCare=this.checked;save()">調教・飼葉の結果演出を省略</label><label>観戦の初期表示<select onchange="state.speedMode=this.value;save()">${['通常','倍速','結果'].map(k=>`<option ${state.speedMode===k?'selected':''}>${k}</option>`).join('')}</select></label>
  <details><summary>実装仕様と資料</summary><p>年間番組は提供された旧版176行、株券資料は590行を採用しています。現役50週、殿堂条件、配合理論の優先順位、賞金区分はセガ公開資料を参照しました。素質、成長曲線、区間タイム、登場馬の能力・特性・イベント倍率は本作の計算値です。</p><p>コンテンツは端末内で進行します。日替わり支給と時計栽培は端末時計、遠征とレジェンド待機はゲーム内カレンダーを使います。順位予想は無料で、結果を記録します。</p><p><a href="https://starhorse.sega.jp/shpocket/plus/breed.html" target="_blank" rel="noopener">公式の配合理論</a> ／ <a href="https://starhorse.sega.jp/shpocket/plus/update.html" target="_blank" rel="noopener">＋版の変更点</a> ／ <a href="https://starhorse.sega.jp/shpocket/plus/newelement.html" target="_blank" rel="noopener">追加コンテンツ</a></p></details><label>検証用シード<input id="gameSeed" type="number" min="1" max="4294967295" placeholder="1〜4294967295"></label><button onclick="const n=Number($('gameSeed').value);if(Number.isInteger(n)&&n>0&&n<=4294967295){state.seed=n;save();this.textContent='設定済み'}">乱数を設定</button></fieldset>`;

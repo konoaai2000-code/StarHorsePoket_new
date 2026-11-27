@@ -1,18 +1,5 @@
 # 音源クレジット
 
-## 音声（assets/audio/voice/）
-秘書ボイス・実況は [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M)（hexgrad、Apache License 2.0）で生成。
-生成スクリプト：`tools/gen_voice.py`（セリフは `tools/voice_lines.json`）。
-
-| 秘書 | 声 |
-| --- | --- |
-| 葵 | jf_alpha |
-| 楓 | jf_tebukuro |
-| 澪 | jf_gongitsune |
-| 凛 | jf_alpha（少し低く加工） |
-| 遥 | jf_nezumi（少し高く加工） |
-| 実況 | jm_kumo |
-
 ## 効果音（assets/audio/sfx/）
 音量の調整、トリミング、フェードの加工を施して使用。
 

@@ -2,7 +2,7 @@
 """assets/css/game.css と assets/img/ を参照している index.html から、CSSと画像をすべて埋め込んだ単一HTMLを作る
 （外部ファイルを読めないアプリ内ビューア等で遊ぶ用）。
 使い方: python3 tools/build_standalone.py index.html standalone.html [--no-audio]
-音声（assets/audio/）も既定で埋め込む（約+2.7MB）。--no-audio なら埋め込まず、ゲーム側は合成音・端末音声で鳴らす。"""
+効果音（assets/audio/）も既定で埋め込む（約+0.8MB）。--no-audio なら埋め込まず、ゲーム側は合成音・端末音声で鳴らす。"""
 import base64, json, re, sys, pathlib
 args = [a for a in sys.argv[1:] if not a.startswith('--')]
 no_audio = '--no-audio' in sys.argv
