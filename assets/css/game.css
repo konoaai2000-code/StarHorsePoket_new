@@ -494,3 +494,6 @@ dialog{max-height:calc(100dvh - 8px)}
  #raceDialog #raceResult{padding:4px 12px}
  #raceDialog #closeRace{margin:8px 12px 14px}
 }
+
+/* 5-4：オススメバッジ（ピンク） */
+.osusume{display:inline-block;background:linear-gradient(#ff7cb4,#e5408a);color:#fff;font-weight:800;font-size:.85em;padding:1px 8px;border-radius:999px;border:1px solid #fff8;box-shadow:0 1px 3px #0005;letter-spacing:.05em}
