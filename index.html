@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Thoroughbred Chronicle | Ver.4.3.1</title><style>
+<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Thoroughbred Chronicle"><meta name="theme-color" content="#101d25"><title>Thoroughbred Chronicle | Ver.4.3.1</title><style>
 :root{color-scheme:dark;--bg:#101d25;--panel:#172a34;--line:#304951;--gold:#e3c27d;--mint:#85d8b3;--muted:#a5bbc0}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#23404b 0,var(--bg) 52%);color:#f3f4ed;font:15px system-ui,sans-serif}header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}h1,h2,h3,p{margin:0}h1{font-family:Georgia,serif;font-size:clamp(21px,4vw,34px);color:var(--gold);letter-spacing:.05em}h2{font-size:20px}h3{font-size:16px}small,.muted{color:var(--muted)}nav{display:flex;gap:8px;overflow:auto;padding:12px 18px;max-width:1180px;margin:auto}button,select,input{font:inherit;color:inherit;border:1px solid #42616b;background:#203842;border-radius:8px;padding:11px 12px}button{cursor:pointer;font-weight:650;touch-action:manipulation}button:hover:not(:disabled){border-color:var(--gold)}button:disabled{opacity:.45;cursor:not-allowed}button.primary,button.active{color:#172a24;background:var(--mint);border-color:var(--mint)}button.gold{background:#b99656;color:#141e21;border-color:var(--gold)}main{max-width:1180px;margin:auto;padding:8px 18px 28px}.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:17px;margin-bottom:12px}.section{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.horse{display:block;width:100%;text-align:left;margin:8px 0;background:#20323a}.horse.active{background:#294e49;color:white;border:1px solid var(--mint)}.horse small{display:block;margin-top:5px}.hero{position:relative;min-height:170px;overflow:hidden;background:linear-gradient(125deg,#192e38,#335b59);display:flex;justify-content:space-between;align-items:center;gap:10px}.hero h2{font-size:clamp(23px,4vw,34px);margin:8px 0}.horse-art{width:150px;max-width:34%;color:#d4b083;filter:drop-shadow(0 12px 9px #0006)}.tag{display:inline-block;color:var(--mint);border:1px solid #639882;padding:3px 8px;font-size:12px;border-radius:5px;margin:2px}.stats{display:grid;gap:11px}.stat{display:grid;grid-template-columns:74px 1fr 39px;align-items:center;gap:8px}.bar{height:8px;background:#0f2027;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#5b9a85,var(--mint));border-radius:9px}.action{display:block;width:100%;text-align:left;margin-top:7px}.action small{display:block;margin-top:4px}.race{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}.race:last-child{border-bottom:0}.grade{color:#e3c27d;font-weight:750}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.feed{color:#cfe3dc;line-height:1.6}.log{font-size:13px;color:var(--muted);padding:7px 0;border-bottom:1px solid var(--line)}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}td,th{padding:10px 6px;border-bottom:1px solid var(--line);white-space:nowrap}canvas{display:block;width:100%;height:auto;background:#255d40;border-radius:9px}dialog{background:var(--panel);color:white;border:1px solid var(--line);border-radius:15px;width:min(94vw,770px);max-height:94vh;overflow:auto;padding:18px}dialog::backdrop{background:#081218ce}label{display:block;margin:12px 0 6px;color:var(--muted)}select,input{width:100%}.notice{padding:12px 16px;border-left:3px solid var(--mint);background:#203b38;border-radius:6px;margin:12px 0;line-height:1.5}.danger{color:#e8ac95}.empty{padding:25px 0;text-align:center;color:var(--muted)}footer{max-width:1180px;margin:auto;padding:0 18px 20px;color:var(--muted);font-size:12px}@media(max-width:730px){.layout{grid-template-columns:1fr}.sidebar{display:flex;gap:8px;overflow:auto}.sidebar .horse{min-width:150px}.cols{grid-template-columns:1fr}.panel{padding:13px}header{padding:14px 16px}.hero{min-height:140px}}
 .center-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.birth{width:min(600px,94vw);border:1px solid #bda36e;border-radius:14px;color:#fff;background:#132a31;padding:20px}.birth-scene{background:linear-gradient(180deg,#162d4b,#376f84 40%,#558d76 62%,#204d32);text-align:center;padding:24px;border:1px solid #d9bd76;border-radius:8px}.birth-scene .horse-art{display:block;width:250px;max-width:70%;margin:14px auto}.birth-scene h2{font-size:30px;color:#f3d992}.birth::backdrop{background:#000a}.hero{background:linear-gradient(180deg,#173955,#385b66 54%,#3e704c 55%,#253a2a)}.center-grid button{font-size:14px}@media(max-width:540px){.center-grid{grid-template-columns:repeat(2,1fr)}}
 
@@ -371,7 +371,17 @@ button.birth-decide{background:linear-gradient(#ffb03a,#f07f13);border-color:#b3
 .birth-tree{background:#f4f1e2;border:1px solid #b9bfa4;border-radius:8px;padding:8px 10px;margin:6px 0;text-align:left;color:#26332a}
 .birth-voice{margin:8px 0;text-align:left}
 </style>
-</head><body><noscript><p style="padding:20px;background:white;color:black">ゲームの起動にはJavaScriptが必要です。HTMLを保存して、スクリプトを実行できるブラウザで開いてください。</p></noscript><header class="mini-header"><div><span class="tag">個人用・オフライン</span> <span id="saveStatus" class="muted">自動保存</span></div></header><nav id="nav"></nav><main id="app"></main><footer>非公式・独立制作の競走馬育成ゲーム。育成馬と演出はオリジナル。資料図鑑・番組には提供CSVの史実名を掲載。ゲーム内の数値は独自の試算です。</footer><div id="titleOverlay" hidden></div><dialog class="ui-dialog" id="menuDialog"><div id="menuContent"></div></dialog><dialog id="raceDialog"><div class="section"><h2 id="raceTitle">レース</h2><span id="racePhase" class="tag">発走</span><select aria-label="観戦カメラ" id="cameraMode"><option value="auto">自動カメラ</option><option value="side">走路</option><option value="wide">上空</option><option value="own">自馬追跡</option><option value="3d">立体中継（3D）</option></select><label><input type="checkbox" id="runnerNames">馬名</label><button id="fastRace" type="button">2倍速</button><button id="skipRace" type="button">結果を見る</button></div><div class="broadcast-screen"><div class="broadcast-hud"><b id="hudDistance"></b><span id="hudStage"></span></div><canvas id="track" width="700" height="310"></canvas><div id="raceMeter"><i></i></div></div><p id="commentary" style="margin:12px 0;color:#d9e9dc">スタートを待っています。</p><div id="raceResult"></div><button id="closeRace" class="primary" style="margin-top:12px" disabled>厩舎へ戻る</button></dialog><style id="user-art-style"></style><script type="application/json" id="asset-pack">{}</script><script>
+</head><body><noscript><p style="padding:20px;background:white;color:black">ゲームの起動にはJavaScriptが必要です。HTMLを保存して、スクリプトを実行できるブラウザで開いてください。</p></noscript><header class="mini-header"><div><span class="tag">個人用・オフライン</span> <span id="saveStatus" class="muted">自動保存</span></div></header><nav id="nav"></nav><main id="app"></main><footer>非公式・独立制作の競走馬育成ゲーム。育成馬と演出はオリジナル。資料図鑑・番組には提供CSVの史実名を掲載。ゲーム内の数値は独自の試算です。</footer><div id="titleOverlay" hidden></div><dialog class="ui-dialog" id="menuDialog"><div id="menuContent"></div></dialog><dialog id="raceDialog"><div class="section"><h2 id="raceTitle">レース</h2><span id="racePhase" class="tag">発走</span><select aria-label="観戦カメラ" id="cameraMode"><option value="auto">自動カメラ</option><option value="side">走路</option><option value="wide">上空</option><option value="own">自馬追跡</option><option value="3d">立体中継（3D）</option></select><label><input type="checkbox" id="runnerNames">馬名</label><button id="fastRace" type="button">2倍速</button><button id="skipRace" type="button">結果を見る</button></div><div class="broadcast-screen"><div class="broadcast-hud"><b id="hudDistance"></b><span id="hudStage"></span></div><canvas id="track" width="700" height="310"></canvas><div id="raceMeter"><i></i></div></div><p id="commentary" style="margin:12px 0;color:#d9e9dc">スタートを待っています。</p><div id="raceResult"></div><button id="closeRace" class="primary" style="margin-top:12px" disabled>厩舎へ戻る</button></dialog><style id="user-art-style"></style><style id="fit-style">
+/* ===== 第10弾：横画面フィットスケーリング用フレーム／ダイアログ収まり／セーフエリア ===== */
+.fit-frame{position:relative;margin-inline:auto;flex:none}
+.fit-frame>.catalog-home,.fit-frame>.home-screen,.fit-frame>.stable-screen{position:absolute;top:0;left:0;margin:0;transform-origin:0 0}
+@media (orientation:landscape){
+html,body{overflow-x:hidden}
+main{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+dialog{max-height:calc(100dvh - 8px)}
+.owner-question{max-height:calc(100dvh - 8px);overflow:auto}
+}
+</style><script type="application/json" id="asset-pack">{}</script><script>
 'use strict';
 const baseDocument="<!doctype html>"+document.documentElement.outerHTML;
 let state;
@@ -1664,7 +1674,7 @@ function practiceField(){
 }
 
 function records(){let all=[...state.horses,...state.retired].sort((a,b)=>(b.earnings||0)-(a.earnings||0));return `<div class="panel"><h2>厩舎戦績・殿堂</h2><div class="honour-gate"><button onclick="go('studbook')">年鑑・産駒成績</button><button onclick="officeSection('series')">殿堂馬シリーズ</button><button onclick="officeSection('cup')">プレミア杯</button><button onclick="officeSection('extras')">シリーズショップ</button></div><p class="muted" style="margin:8px 0">全 ${all.length}頭 / ${all.reduce((s,h)=>s+wins(h),0)}勝</p>${all.map(h=>`<details class="panel"><summary><span class="record35">${horseFigure(h,'head')}</span><b>${esc(h.name)}</b>　第${h.gen}世代 · 賞金 ${h.earnings||0}枚 ${h.retired&&h.earnings>=3000?'★ 殿堂馬':''} · ${h.retired?'繁殖馬':'現役'}　${wins(h)}勝 / ${h.results.length}戦 ${h.titles.length?'<span class="tag">タイトル '+h.titles.length+'</span>':''}</summary>${h.retired?`<button onclick="breedFromRetired('${h.id}')">この馬で次世代を生産</button>`:''}<p class="muted" style="margin:12px 0">父：${esc(h.parents[0])}　母：${esc(h.parents[1])}</p><div class="tablewrap"><table><thead><tr><th>レース</th><th>グレード</th><th>着順</th><th>賞金</th><th>距離</th></tr></thead><tbody>${h.results.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.grade}</td><td>${r.place}着</td><td>${r.prize??award(r.grade,r.place)}枚</td><td>${r.distance}m　${albumButton(h,r)}</td></tr>`).join('')||'<tr><td colspan="4">まだ出走していません</td></tr>'}</tbody></table></div></details>`).join('')}</div><div class="panel"><h3>厩舎日誌</h3>${state.log.map(x=>`<div class="log">${esc(x)}</div>`).join('')}</div>`}
-function settings(){return `<div class="panel"><h2>厩舎設定・データ管理</h2><div class="setup35"><section><h3>厩舎・観戦設定</h3>${openingSeasonControl()}<button onclick="assetPanel()">画像素材の差し替え</button><label>厩舎名<input maxlength="16" value="${esc(state.stableName||'クロニクル厩舎')}" onchange="state.stableName=this.value.trim().slice(0,16)||'クロニクル厩舎';save()"></label>${optControls()}<p><label><input type="checkbox" ${state.returnHome?'checked':''} onchange="state.returnHome=this.checked;save()"> 週送り後にホームへ戻る</label></p><p><label><input type="checkbox" ${state.eventPreview!==false?'checked':''} onchange="state.eventPreview=this.checked;save()"> 季節杯のホーム通知</label></p></section><section><h3>保存・引き継ぎ</h3><button onclick="titleScreen()">厩舎スロットを選ぶ</button><p class="notice">ブラウザ内で自動保存します。端末やブラウザを変更する前にバックアップを作成してください。</p><p>4週ごとに、週送り前の厩舎を復元ポイントに保存します。</p><button onclick="storeCheckpoint(true)">今の状態で復元ポイントを更新</button><button onclick="loadCheckpoint()">復元ポイントを読み込む</button><div class="row"><button onclick="exportSave()">バックアップを書き出す</button><button onclick="document.getElementById('import').click()">バックアップを読み込む</button><input id="import" type="file" accept=".json,application/json" hidden onchange="importSave(this)"><button onclick="textBackup()">テキストで引き継ぎ</button><button class="danger" onclick="resetSave()">初期化</button></div></section></div></div>`}function exportSave(){let u=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='thoroughbred-save.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}function importSave(el){const file=el.files[0];if(!file)return;el.value='';file.text().then(readBackup).catch(()=>gameNotice('ファイルを読み取れませんでした。'))}async function resetSave(){if(await askOwner('全データを初期化しますか？')){state=initial();lastDraw=null;normalize();state.selected=state.horses[0].id;storeCheckpoint();render()}}
+function settings(){return `<div class="panel"><h2>厩舎設定・データ管理</h2><div class="setup35"><section><h3>厩舎・観戦設定</h3>${openingSeasonControl()}<button onclick="assetPanel()">画像素材の差し替え</button><label>厩舎名<input maxlength="16" value="${esc(state.stableName||'クロニクル厩舎')}" onchange="state.stableName=this.value.trim().slice(0,16)||'クロニクル厩舎';save()"></label>${optControls()}<p><button type="button" onclick="toggleFullscreen()">全画面表示</button></p><p class="notice">iPhoneのSafariではボタン操作で全画面にできません。Safariの共有ボタンから「ホーム画面に追加」を選び、追加したアイコンから起動すると全画面（スタンドアロン表示）で遊べます。</p><p><label><input type="checkbox" ${state.returnHome?'checked':''} onchange="state.returnHome=this.checked;save()"> 週送り後にホームへ戻る</label></p><p><label><input type="checkbox" ${state.eventPreview!==false?'checked':''} onchange="state.eventPreview=this.checked;save()"> 季節杯のホーム通知</label></p></section><section><h3>保存・引き継ぎ</h3><button onclick="titleScreen()">厩舎スロットを選ぶ</button><p class="notice">ブラウザ内で自動保存します。端末やブラウザを変更する前にバックアップを作成してください。</p><p>4週ごとに、週送り前の厩舎を復元ポイントに保存します。</p><button onclick="storeCheckpoint(true)">今の状態で復元ポイントを更新</button><button onclick="loadCheckpoint()">復元ポイントを読み込む</button><div class="row"><button onclick="exportSave()">バックアップを書き出す</button><button onclick="document.getElementById('import').click()">バックアップを読み込む</button><input id="import" type="file" accept=".json,application/json" hidden onchange="importSave(this)"><button onclick="textBackup()">テキストで引き継ぎ</button><button class="danger" onclick="resetSave()">初期化</button></div></section></div></div>`}function exportSave(){let u=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='thoroughbred-save.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}function importSave(el){const file=el.files[0];if(!file)return;el.value='';file.text().then(readBackup).catch(()=>gameNotice('ファイルを読み取れませんでした。'))}async function resetSave(){if(await askOwner('全データを初期化しますか？')){state=initial();lastDraw=null;normalize();state.selected=state.horses[0].id;storeCheckpoint();render()}}
 
 function homeHorse(id){state.selected=id;go('stable')}
 function homeInfo(kind){if(['predict','daily','archive','office','shrine','gifts','auction'].includes(kind)){showExtra(kind);return}let title='',content='';let all=[...state.horses,...state.retired];if(kind==='farm'){title='農園';content=farmPanel()}
@@ -3323,4 +3333,65 @@ function exportArtwork(){
 applyArtwork();normalize();
 render();
 titleScreen();
+</script><script id="fit-script">
+'use strict';
+/* ===== 第10弾：横画面フィットスケーリング（ステージを実効ビューポートへ一括縮小・レターボックス）＋全画面化 ===== */
+const FIT_W=1180,FIT_H=664;
+let fitFrameEl=null,fitStageNode=null,fitQueued=false;
+function computeFitScale(availW,availH){
+ if(!(availW>0)||!(availH>0))return 0;
+ return Math.min(availW/FIT_W,availH/FIT_H,1);
+}
+function unwrapFit(){
+ if(fitStageNode){
+  const st=fitStageNode.style;
+  st.width='';st.height='';st.transform='';
+  if(fitFrameEl&&fitFrameEl.parentNode){fitFrameEl.parentNode.insertBefore(fitStageNode,fitFrameEl);fitFrameEl.remove()}
+ }
+ fitFrameEl=null;fitStageNode=null;
+}
+function fitStage(){
+ try{
+  const app=document.getElementById('app');if(!app)return;
+  const vv=window.visualViewport;
+  const vw=vv?vv.width:window.innerWidth,vh=vv?vv.height:window.innerHeight;
+  const stage=app.querySelector('.catalog-home,.stable-screen,.home-screen');
+  if(!stage||!(vw>vh)){unwrapFit();return}
+  if(!fitFrameEl||!fitFrameEl.isConnected||fitStageNode!==stage){
+   unwrapFit();
+   fitFrameEl=document.createElement('div');fitFrameEl.className='fit-frame';
+   stage.parentNode.insertBefore(fitFrameEl,stage);
+   fitFrameEl.appendChild(stage);
+   fitStageNode=stage;
+  }
+  fitFrameEl.style.width='';fitFrameEl.style.height='';
+  const availW=fitFrameEl.clientWidth;
+  const top=fitFrameEl.getBoundingClientRect().top;
+  const footer=document.querySelector('body>footer');
+  const footH=footer?footer.offsetHeight:0;
+  const availH=vh-top-footH-4;
+  const s=computeFitScale(availW,availH);
+  if(!(s>0)||s>=0.999){unwrapFit();return}
+  fitFrameEl.style.width=(FIT_W*s)+'px';
+  fitFrameEl.style.height=(FIT_H*s)+'px';
+  const st=fitStageNode.style;
+  st.width=FIT_W+'px';st.height=FIT_H+'px';
+  st.transform='scale('+s+')';
+ }catch(e){/* 計測に失敗した場合は従来レイアウトのまま */}
+}
+function queueFit(){if(fitQueued)return;fitQueued=true;requestAnimationFrame(()=>{fitQueued=false;fitStage()})}
+window.addEventListener('resize',queueFit);
+window.addEventListener('orientationchange',()=>setTimeout(queueFit,80));
+if(window.visualViewport)window.visualViewport.addEventListener('resize',queueFit);
+const fitAppEl=document.getElementById('app');
+if(fitAppEl)new MutationObserver(queueFit).observe(fitAppEl,{childList:true,subtree:true});
+queueFit();
+async function toggleFullscreen(){
+ const doc=document,el=doc.documentElement;
+ const fsEl=doc.fullscreenElement||doc.webkitFullscreenElement;
+ if(fsEl){const exit=doc.exitFullscreen||doc.webkitExitFullscreen;if(exit)exit.call(doc);return}
+ const req=el.requestFullscreen||el.webkitRequestFullscreen;
+ if(req){try{await req.call(el)}catch(e){gameNotice('全画面表示を開始できませんでした。')}return}
+ gameNotice('この端末・ブラウザではボタンで全画面にできません（iPhoneのSafariなど）。Safariの共有ボタンから「ホーム画面に追加」を選び、追加したアイコンから起動すると全画面で遊べます。');
+}
 </script></body></html>
