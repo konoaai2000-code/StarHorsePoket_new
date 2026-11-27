@@ -352,6 +352,7 @@ function migrateNames(){
 }
 function normalize(){
  migrateNames();
+  if(state.effects===undefined)state.effects=70;if(state.voice===undefined)state.voice=true;
   state.clock=Number.isSafeInteger(state.clock)?Math.max(0,state.clock):0;
   state.yearStart=Number.isInteger(state.yearStart)?state.yearStart:2024;
   state.progress??={};
@@ -1511,6 +1512,7 @@ function resultDetail(index){
 }
 
 function showDraw(index){
+ try{if(index>0)sfx('card')}catch{}
  const rows=state.progress.drawReceipt39;
  if(!Array.isArray(rows)||!rows.length||rows.length>10)return;
  const cards=rows.map(x=>studs.find(h=>h.id===x?.id));if(cards.some(h=>!h))return;
@@ -1678,7 +1680,7 @@ showTitle(`<div class="shp-sub"><h3>公式からのお知らせ</h3><p>本作は
 function titleLegal(kind){
 titleSlotKeep=Number($('slotChoice')?.value)||activeSlot;
 const privacy=kind==='privacy';
-showTitle(`<div class="shp-sub"><h3>${privacy?'プライバシーポリシー':'利用規約'}</h3>${privacy?`<p>本ゲームは、サービスを終了した『スターホースポケット＋』（©SEGA）を個人が趣味の範囲でオフライン再現した非公式作品です。公開・配布は行いません。</p><p>本ゲームは個人情報の収集・送信を一切行いません。セーブデータはお使いのブラウザ内（localStorage）にのみ保存され、外部サーバーへ送信されることはありません。</p><p>プレイヤーIDは端末内で生成される表示専用の文字列で、個人を特定するものではありません。</p>`:`<p>本ゲームは個人制作のオフライン専用ゲームです。プレイにあたって料金は発生しません。</p><p>セーブデータの管理は利用者ご自身の責任で行ってください。ブラウザのデータを削除するとセーブデータも消えます。大切なデータは「データ引継ぎ」からバックアップを書き出してください。</p><p>本ゲームはSEGA公式とは関係のない非公式の再現作品です。</p>`}<button type="button" class="shp-back" onclick="titleScreen()">← タイトルに戻る</button></div>`);
+showTitle(`<div class="shp-sub"><h3>${privacy?'プライバシーポリシー':'利用規約'}</h3>${privacy?`<p>本ゲームは、サービスを終了した『スターホースポケット＋』（©SEGA）を個人が趣味の範囲でオフライン再現した非公式作品です。公開・配布は行いません。</p><p>本ゲームは個人情報の収集・送信を一切行いません。セーブデータはお使いのブラウザ内（localStorage）にのみ保存され、外部サーバーへ送信されることはありません。</p><p>プレイヤーIDは端末内で生成される表示専用の文字列で、個人を特定するものではありません。</p>`:`<p>本ゲームは個人制作のオフライン専用ゲームです。プレイにあたって料金は発生しません。</p><p>セーブデータの管理は利用者ご自身の責任で行ってください。ブラウザのデータを削除するとセーブデータも消えます。大切なデータは「データ引継ぎ」からバックアップを書き出してください。</p><p>本ゲームはSEGA公式とは関係のない非公式の再現作品です。</p><h3 style="margin-top:18px">音源クレジット</h3><p style="font-size:13px;line-height:1.6">秘書ボイス・実況：Kokoro-82M（hexgrad, Apache-2.0）で生成<br>蹄音：Alan McKinney（alanmcki）“Galloping” CC BY 3.0<br>歓声：Gregor Quendel “Free Crowd Cheering Sounds” CC BY 4.0<br>拍手・ファンファーレ・カード・コイン・操作音ほか：OpenGameArt / Kenney ほか CC0<br>詳細は同梱の CREDITS.md を参照。</p>`}<button type="button" class="shp-back" onclick="titleScreen()">← タイトルに戻る</button></div>`);
 }
 function titleTransfer(){
 titleSlotKeep=Number($('slotChoice')?.value)||activeSlot;
@@ -2378,7 +2380,7 @@ function showRace(replay){
   let sectional='',lastSplit=0;
   let skipped=state.speedMode==='結果',lastPhase='';
   skip.onclick=()=>{skipped=true};
-  dialog.showModal();sfx('start');
+  dialog.showModal();sfx('start');raceAmbience('start');
   const ctx=$('track').getContext('2d');
   let lastPaint=-Infinity,previous=performance.now(),elapsed=0,speed=state.speedMode==='倍速'?2:1;const fast=$('fastRace');fast.textContent=speed===1?'2倍速':'等速';fast.onclick=()=>{speed=speed===1?2:1;fast.textContent=speed===1?'2倍速':'等速'};
   const duration=matchMedia('(prefers-reduced-motion: reduce)').matches?1500:8500;
@@ -2392,7 +2394,7 @@ function showRace(replay){
     const leader=[...positions].sort((a,b)=>b.d-a.d)[0].v.name;
     const progress=t===1?1:Math.max(...positions.map(p=>p.d)),phase=coursePhase(courseFilm(replay),progress);
     $('racePhase').textContent=phase;$('hudStage').textContent=phase;$('hudDistance').textContent='残り '+Math.ceil((1-progress)*replay.distance/10)*10+'m';$('raceMeter').firstElementChild.style.width=(t*100)+'%';
- if(state.voice&&phase!==lastPhase){lastPhase=phase;const runner=lanes.find(v=>v.name===leader);sayLocal(phase+'、'+(runner?.reading||leader)+(t===1?'が優勝です':'が先頭です'))}
+ if(phase!==lastPhase){lastPhase=phase;raceCall(phase,positions,lanes,leader,t,finish,speed)}
     $('commentary').textContent=t<1?`${leader}が先頭　残り ${Math.ceil((1-progress)*replay.distance)}m`:`${finish[0].name}が優勝！`;
     const split=Math.floor(t*replay.distance/400);
     if(split>lastSplit){
@@ -2423,18 +2425,109 @@ function showRace(replay){
   requestAnimationFrame(frame);
 }
 
+/* ===== 第12弾：実録音の効果音・秘書ボイス・実況（assets/audio/）。読み込めない環境では従来の合成音・端末音声に戻る ===== */
+const AUDIO_BASE='assets/audio/',audioBroken=new Set(),audioCache={};
+function audioBase(path){let a=audioCache[path];if(!a){a=new Audio(window.AUDIO_PACK?.[path]||AUDIO_BASE+path);a.preload='auto';audioCache[path]=a}return a}
+// 再生できたら Audio を返す。ファイル欠落時は fallback を呼ぶ（初回の失敗は error イベントで検知）
+function playFile(path,volume,fallback,loop=false){
+ if(audioBroken.has(path)||!(volume>0))return null;
+ let fellBack=false;const once=()=>{if(fellBack)return;fellBack=true;audioBroken.add(path);if(fallback)fallback()};
+ try{
+  const a=loop?audioBase(path):audioBase(path).cloneNode();
+  a.loop=loop;a.volume=Math.max(0,Math.min(1,volume));
+  a.addEventListener('error',once,{once:true});
+  const p=a.play();if(p)p.catch(e=>{if(e&&e.name==='NotSupportedError')once()});
+  return a;
+ }catch{return null}
+}
+const SFX_FILES={start:'fanfare',win:'fanfareBig',gacha:'gacha',card:'card',great:'great',success:'success',week:'week',coin:'coin',error:'error',click:'click',cheer:'cheer',applause:'applause'};
+function sfx(name){
+ if(!state.effects)return;
+ const file=SFX_FILES[name];
+ if(!file){sfxSynth(name);return}
+ if(!playFile('sfx/'+file+'.mp3',Number(state.effects)/100,()=>sfxSynth(name)))sfxSynth(name);
+}
+let voicePlaying=null;
+function playVoice(path,fallback){
+ try{voicePlaying?.pause()}catch{}
+ try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch{}
+ voicePlaying=playFile(path,Number(state.voiceVolume??75)/100,fallback);
+ return voicePlaying;
+}
+function secVoiceClip(text){
+ const i=Number(state.secretary)||0;
+ const sets={greet:secGreet,cheer:secCheer,praise:secPraise,calm:secCalm,birth:secBirth,raceWin:secRaceWin,racePlace:secRacePlace,raceBoard:secRaceBoard,raceOut:secRaceOut,raceOther:secRaceOther};
+ for(const [k,arr] of Object.entries(sets))if(arr[i]===text)return `voice/s${i}/${k}.mp3`;
+ return null;
+}
+// 実況：区間が変わるたびに短いクリップ。重要な掛け声（最後の直線・ゴール）は前の声を切って割り込む
+let callAudio=null,callUntil=0;
+function raceCallBusy(){return Math.max(0,callUntil-performance.now())}
+function sayCall(key,priority,then){
+ if(!state.voice)return false;
+ const now=performance.now();
+ if(!priority&&callAudio&&!callAudio.paused&&!callAudio.ended)return true;
+ try{callAudio?.pause()}catch{}
+ const a=playFile('voice/commentary/'+key+'.mp3',Number(state.voiceVolume??75)/100,null);
+ if(!a)return false;
+ callAudio=a;callUntil=now+2600;
+ a.addEventListener('loadedmetadata',()=>{if(callAudio===a&&isFinite(a.duration))callUntil=performance.now()+a.duration*1000+150},{once:true});
+ if(then)a.addEventListener('ended',then,{once:true});
+ return true;
+}
+function raceCall(phase,positions,lanes,leader,t,finish,speed){
+ raceAmbience(phase);
+ if(!state.voice)return;
+ const numberOf=v=>{const i=lanes.indexOf(v);return Math.min(18,Math.max(1,Number(v?.number)||i+1))};
+ const leadV=lanes.find(v=>v.name===leader);
+ const fallback=()=>{const runner=leadV;try{sayLocal(phase+'、'+(runner?.reading||leader)+(t===1?'が優勝です':'が先頭です'))}catch{}};
+ if(audioBroken.has('voice/commentary/start.mp3')){fallback();return}
+ const lead='lead'+numberOf(leadV);
+ let ok=true;
+ if(phase==='発走')ok=sayCall('start',true);
+ else if(phase==='コーナー')ok=speed>1?true:sayCall('corner',false);
+ else if(phase==='直線区間')ok=sayCall(lead,false);
+ else if(phase==='最終コーナー')ok=sayCall('finalCorner',false,()=>{if(lastRacePhase==='最終コーナー')sayCall(lead,false)});
+ else if(phase==='最後の直線')ok=sayCall('homeStretch',true);
+ else if(phase==='直線競走')ok=sayCall('sprint',true);
+ else if(phase==='確定')ok=sayCall('goal',true,()=>sayCall('win'+numberOf(finish[0]),true));
+ if(!ok)fallback();
+}
+// 場内の音：歓声のループと蹄音。最後の直線で盛り上げ、ゴールで大歓声
+let ambCrowd=null,ambGallop=null,lastRacePhase='';
+function fadeTo(a,vol,ms=600){if(!a)return;const from=a.volume,t0=performance.now();const step=()=>{const k=Math.min(1,(performance.now()-t0)/ms);try{a.volume=Math.max(0,Math.min(1,from+(vol-from)*k))}catch{}if(k<1)requestAnimationFrame(step);else if(vol===0){try{a.pause()}catch{}}};requestAnimationFrame(step)}
+function raceAmbience(phase){
+ lastRacePhase=phase;
+ const fx=Number(state.effects||0)/100;
+ if(phase==='stop'){fadeTo(ambCrowd,0,400);fadeTo(ambGallop,0,300);return}
+ if(!fx)return;
+ if(phase==='start'){
+  try{ambCrowd?.pause();ambGallop?.pause()}catch{}
+  ambCrowd=playFile('sfx/crowd.mp3',fx*.28,null,true);if(ambCrowd)try{ambCrowd.currentTime=0}catch{}
+  ambGallop=playFile('sfx/gallop.mp3',fx*.55,null,true);if(ambGallop)try{ambGallop.currentTime=0}catch{}
+  return;
+ }
+ if(phase==='最終コーナー')fadeTo(ambCrowd,fx*.45);
+ if(phase==='最後の直線'||phase==='直線競走'){fadeTo(ambCrowd,fx*.7);fadeTo(ambGallop,fx*.8)}
+ if(phase==='確定'){fadeTo(ambGallop,0,900);fadeTo(ambCrowd,fx*.3,1500);sfx('cheer')}
+}
+
 /* ===== 第11弾：レース後の演出（ゴール → 確定・着順発表 → 賞金・獲得 → 秘書コメント）。表示のみで計算には関与しない ===== */
 let raceFinaleToken=0;
 function raceFinaleReset(){raceFinaleToken++;document.getElementById('raceFinale')?.remove();document.querySelector('#raceResult .finale-card')?.remove()}
+const secRaceWin=['やりましたね！　見事な勝利です！','やったー！　勝った勝った！　最高だよ！','勝ちました……！　本当に、よく頑張りましたね','勝ったわね。よくやったわ、見事な走りよ','すごーい！　一着だよ！　おめでとう！'];
+const secRacePlace=['惜しかったですね。上位争いはしっかりできていますよ','あとちょっとだったね！　次は絶対勝てるよ！','惜しかったです……。でも、いい走りでしたよ','悪くないわ。あと一歩、詰めていきましょう','おしいー！　でもすっごくがんばってたよ！'];
+const secRaceBoard=['掲示板は確保できました。次はもう少し上を目指しましょう','掲示板入り！　次はもっと上を狙おう！','掲示板に載りましたね。少しずつ、前進です','掲示板は確保。次は上位を狙うわよ','掲示板だよ！　次はもっと上にいこうね！'];
+const secRaceOut=['今回は残念でした。距離や調子を見直してみましょう','うーん、残念！　次で巻き返そう！','今回は残念でしたね……。ゆっくり立て直しましょう','次は作戦を見直しましょう。原因は必ずあるわ','ざんねーん……。でも次はきっと大丈夫だよ！'];
+const secRaceOther=['いいレースでしたね。次に当たるときの参考にしましょう','見ごたえあったね！　参考にしよっと！','いいレースでした……。勉強になりますね','展開はしっかり見ておいたわ。次に活かしましょう','すごいレースだったね！　ドキドキしたよ！'];
 function raceFinaleComment(replay){
- const fin=replay.finish,ownAt=fin.findIndex(v=>v.own),own=fin[ownAt];
- if(replay.simulation&&ownAt<0)return `${fin[0].name}の勝利です。展開をよく見ておきますね。`;
- if(ownAt<0)return `${fin[0].name}が勝ちました。次に当たるときの参考にしましょう。`;
- const n=own.name;
- if(ownAt===0)return `やりましたね！${n}、見事な勝利です！`;
- if(ownAt<=2)return `${n}、${ownAt+1}着です。惜しかったですね。上位争いはしっかりできています。`;
- if(ownAt<=4)return `${n}は${ownAt+1}着。掲示板には載りました。次はもう少し上を目指しましょう。`;
- return `${n}は${ownAt+1}着でした。距離や調子を見直して、次で巻き返しましょう。`;
+ const fin=replay.finish,ownAt=fin.findIndex(v=>v.own),own=fin[ownAt],i=Number(state.secretary)||0;
+ if(ownAt<0)return {head:`${fin[0].name}の勝利。`,line:secRaceOther[i]};
+ const head=`${own.name}、${ownAt+1}着。`;
+ if(ownAt===0)return {head,line:secRaceWin[i]};
+ if(ownAt<=2)return {head,line:secRacePlace[i]};
+ if(ownAt<=4)return {head,line:secRaceBoard[i]};
+ return {head,line:secRaceOut[i]};
 }
 function raceFinale(replay,quick){
  const token=++raceFinaleToken,fin=replay.finish,screen=document.querySelector('#raceDialog .broadcast-screen'),res=$('raceResult');
@@ -2443,7 +2536,7 @@ function raceFinale(replay,quick){
  ov.innerHTML='<div class="finale-goal">ゴール！</div>';
  if(screen)screen.appendChild(ov);
  res.classList.add('finale-hide');
- const sec=secretaries[state.secretary||0]||secretaries[0],line=raceFinaleComment(replay);
+ const sec=secretaries[state.secretary||0]||secretaries[0],{head,line}=raceFinaleComment(replay);
  const earned=(replay.earned||[]);
  const board=()=>{
   ov.innerHTML=`<div class="finale-board"><div class="finale-lamp">確定</div><ol>${fin.slice(0,3).map((v,i)=>`<li class="${v.own?'own':''}" style="animation-delay:${quick?0:i*.18}s"><b>${i+1}着</b><span>${esc(v.name)}</span>${v.own?'<small>自厩舎</small>':''}</li>`).join('')}</ol><p class="finale-tap">タップで結果へ</p></div>`;
@@ -2452,15 +2545,15 @@ function raceFinale(replay,quick){
   if(token!==raceFinaleToken)return;raceFinaleToken++;
   if(!ov.querySelector('.finale-board'))board();
   ov.classList.add('done');
-  res.insertAdjacentHTML('afterbegin',`<div class="finale-card"><section class="finale-earn"><h3>賞金・獲得</h3>${earned.length?earned.map(e=>`<p>${esc(e)}</p>`).join(''):'<p class="muted">今回の獲得はありません。</p>'}</section><section class="finale-sec"><span class="staff-image portrait${Number(state.secretary)||0}"></span><p><b>${esc(sec)}</b>「${esc(line)}」</p></section><button type="button" class="primary finale-close" onclick="$('closeRace').click()">${weekInProgress&&state.replays.length>1?'次のレースへ':'厩舎へ戻る'}</button></div>`);
+  res.insertAdjacentHTML('afterbegin',`<div class="finale-card"><section class="finale-earn"><h3>賞金・獲得</h3>${earned.length?earned.map(e=>`<p>${esc(e)}</p>`).join(''):'<p class="muted">今回の獲得はありません。</p>'}</section><section class="finale-sec"><span class="staff-image portrait${Number(state.secretary)||0}"></span><p><small>${esc(head)}</small><br><b>${esc(sec)}</b>「${esc(line)}」</p></section><button type="button" class="primary finale-close" onclick="$('closeRace').click()">${weekInProgress&&state.replays.length>1?'次のレースへ':'厩舎へ戻る'}</button></div>`);
   res.classList.remove('finale-hide');
   $('closeRace').disabled=false;
-  try{secVoice(line)}catch{}
+  try{const waitCall=raceCallBusy();setTimeout(()=>{try{secVoice(line)}catch{}},waitCall)}catch{}
   requestAnimationFrame(()=>{try{res.scrollIntoView({behavior:quick?'auto':'smooth',block:'start'})}catch{}});
  };
  ov.onclick=reveal;
  if(quick){board();reveal();return}
- setTimeout(()=>{if(token===raceFinaleToken){board();try{sfx('start')}catch{}}},1100);
+ setTimeout(()=>{if(token===raceFinaleToken){board();try{sfx('applause')}catch{}}},1100);
  setTimeout(reveal,3000);
 }
 
@@ -2524,10 +2617,10 @@ function playAudio(){
  const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
  soundContext??=new C();soundContext.resume().catch(()=>{});
  if(level&&!musicTimer){let step=0;musicTimer=setInterval(()=>{if(!state.music){clearInterval(musicTimer);musicTimer=null;return}if(!document.hidden){if(step%4===0)makeTone(110,soundContext.currentTime,1.5,Number(state.music/100)*.55);makeTone([220,329.63,392,293.66,246.94,329.63,293.66,196][step++%8],soundContext.currentTime,.65,state.music/100)}},720)}
- if(state.effects)makeTone(660,soundContext.currentTime,.10,state.effects/100);
+ if(state.effects&&!playFile('sfx/click.mp3',state.effects/100*.6,()=>makeTone(660,soundContext.currentTime,.10,state.effects/100)))makeTone(660,soundContext.currentTime,.10,state.effects/100);
 }
 
-function sfx(name){
+function sfxSynth(name){
  if(!state.effects)return;
  try{
   const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
@@ -2544,6 +2637,12 @@ const secPraise=['よく頑張りましたね。この積み重ねが大事で�
 const secCalm=['状態は維持できています。焦らずいきましょう','今日はお休みモードだね。次に期待！','静かに力を溜めているみたいです','無理は禁物。こういう日もあるわ','だいじょうぶ！　次はもっと伸びるよ'];
 const secBirth=['生まれましたよ！　とっても元気な仔です','やったー！　新しい仔馬の誕生だよ！','生まれました……。すくすく育ちますように','いい仔ね。これからが楽しみだわ','わあ、生まれたー！　おめでとう！'];
 function secVoice(text){
+ if(!state.voice||!text)return;
+ const clip=secVoiceClip(text);
+ if(clip&&playVoice(clip,()=>secVoiceTTS(text)))return;
+ secVoiceTTS(text);
+}
+function secVoiceTTS(text){
  try{
   if(!state.voice||!text||!('speechSynthesis' in window))return;
   const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.pitch=1.15;u.rate=1.02;u.volume=Number(state.voiceVolume??75)/100;
@@ -2823,7 +2922,7 @@ function lineagePage(id){
 }
 function optControls(){
  return `<fieldset><legend>観戦・育成設定</legend><label>秘書<select aria-label="秘書" onchange="state.secretary=Number(this.value);save()">${secretaries.map((x,i)=>`<option value="${i}" ${i===(state.secretary||0)?'selected':''}>${x}</option>`).join('')}</select></label>
- <label><input type="checkbox" ${state.voice?'checked':''} onchange="state.voice=this.checked;save()">端末内の日本語音声で実況</label>
+ <label><input type="checkbox" ${state.voice?'checked':''} onchange="state.voice=this.checked;save()">秘書ボイス・実況</label>
  <label>音量<input type="range" min="0" max="100" value="${Number(state.voiceVolume??75)}" onchange="state.voiceVolume=Number(this.value);save()"></label>
  <label>牧場BGM<input type="range" min="0" max="100" value="${Number(state.music||0)}" onchange="state.music=Number(this.value);save();playAudio()"></label><label>操作音<input type="range" min="0" max="100" value="${Number(state.effects||0)}" onchange="state.effects=Number(this.value);save();playAudio()"></label><label>競走画質<select onchange="state.qualityMode=this.value;save()">${['標準','省電力'].map(k=>`<option ${state.qualityMode===k?'selected':''}>${k}</option>`).join('')}</select></label><label><input type="checkbox" ${state.skipCare?'checked':''} onchange="state.skipCare=this.checked;save()">調教・飼葉の結果演出を省略</label><label>観戦の初期表示<select onchange="state.speedMode=this.value;save()">${['通常','倍速','結果'].map(k=>`<option ${state.speedMode===k?'selected':''}>${k}</option>`).join('')}</select></label>
  <details><summary>実装仕様と資料</summary><p>年間番組は提供された旧版176行、株券資料は590行を採用しています。現役50週、殿堂条件、配合理論の優先順位、賞金区分はセガ公開資料を参照しました。素質、成長曲線、区間タイム、登場馬の能力・特性・イベント倍率は本作の計算値です。</p><p>コンテンツは端末内で進行します。日替わり支給と時計栽培は端末時計、遠征とレジェンド待機はゲーム内カレンダーを使います。順位予想は無料で、結果を記録します。</p><p><a href="https://starhorse.sega.jp/shpocket/plus/breed.html" target="_blank" rel="noopener">公式の配合理論</a> ／ <a href="https://starhorse.sega.jp/shpocket/plus/update.html" target="_blank" rel="noopener">＋版の変更点</a> ／ <a href="https://starhorse.sega.jp/shpocket/plus/newelement.html" target="_blank" rel="noopener">追加コンテンツ</a></p></details><label>検証用シード<input id="gameSeed" type="number" min="1" max="4294967295" placeholder="1〜4294967295"></label><button onclick="const n=Number($('gameSeed').value);if(Number.isInteger(n)&&n>0&&n<=4294967295){state.seed=n;save();this.textContent='設定済み'}">乱数を設定</button></fieldset>`;
@@ -2905,7 +3004,7 @@ function strengthenSeries(){if(!state.series||!(state.seriesPoints>=2))return;st
 
 $('raceDialog').addEventListener('cancel',event=>event.preventDefault());
 $('closeRace').onclick=()=>{
-  $('raceDialog').close();
+  raceAmbience('stop');$('raceDialog').close();
   locked=false;
   if(weekInProgress){const finished=state.replays.shift();save();playNextRace();if(finished?.debut&&!state.replays.length&&current()?.id===finished.debut)openMenu('condition')}
   else render();
