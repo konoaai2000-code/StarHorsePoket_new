@@ -668,7 +668,7 @@ let skipWatchRaces=null,skipAllWatch=false;
 let weekInProgress=false;
 function nextWeek(){
   if(locked||weekInProgress)return;
-  sfx('week');
+  sfx('week');questCount('week');
   const now=state.clock;if(now%4===0)storeCheckpoint();
   const growing=state.horses.filter(h=>h.week>0);
   const scheduled=new Map(),notes=new Map();
@@ -713,7 +713,7 @@ function nextWeek(){
     return replay;
   });
   for(const h of growing){h.weight+=2;notes.get(h.id).push('週成長 +2kg')}
-  state.clock++;returnTrips();
+  state.clock++;returnTrips();try{settleBets()}catch{}
   state.weekReport={at:now,rows:state.horses.map(h=>({name:h.name,events:notes.get(h.id).map(e=>e==='遠征中'&&!h.trip?'遠征から帰還':e),weight:h.weight,week:h.week}))};
   log(`${dateLabel()} に進みました`);
   finishWeek();
@@ -783,7 +783,7 @@ function stat(n,v){return `<div class="stat"><span>${n}</span><div class="bar"><
 function backdrop(){return `<svg class="scene-bg" viewBox="0 0 1000 562" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="wood" x2="1" y2="1"><stop stop-color="#56796f"/><stop offset=".5" stop-color="#30544f"/><stop offset="1" stop-color="#193632"/></linearGradient><linearGradient id="stall" x2="0" y2="1"><stop stop-color="#101713"/><stop offset="1" stop-color="#3a3930"/></linearGradient><linearGradient id="yard" x2="0" y2="1"><stop stop-color="#8ba7a0"/><stop offset=".55" stop-color="#587654"/><stop offset="1" stop-color="#81936b"/></linearGradient><pattern id="planks" width="100" height="57" patternUnits="userSpaceOnUse"><rect width="100" height="57" fill="url(#wood)"/><path d="M0 2H100M0 54H100" stroke="#122e29" stroke-width="3" opacity=".7"/><path d="M4 11q23 -3 56 0m-25 16q30 3 60 -1M10 43q20 -5 50 -2" stroke="#74928a" opacity=".23" fill="none"/></pattern><linearGradient id="post"><stop stop-color="#293b32"/><stop offset=".3" stop-color="#a5ad90"/><stop offset=".65" stop-color="#737e6a"/><stop offset="1" stop-color="#23362c"/></linearGradient></defs><rect width="1000" height="562" fill="url(#yard)"/><g fill="#3a5d34"><circle cx="933" cy="109" r="72"/><circle cx="987" cy="134" r="85"/><circle cx="888" cy="138" r="49"/></g><g fill="#b1b49a"><rect x="860" y="260" width="140" height="9"/><rect x="860" y="305" width="140" height="8"/><rect x="888" y="244" width="10" height="105"/><rect x="966" y="244" width="10" height="105"/></g><path d="M845 380L1000 338V562H845Z" fill="#77786b"/><rect width="862" height="562" fill="url(#planks)"/><rect x="302" y="8" width="330" height="540" fill="url(#stall)"/><path d="M320 55H622M320 104H622M320 153H622" stroke="#484c3b" stroke-width="10" opacity=".6"/><path d="M344 0V562M624 0V562" stroke="#111c16" stroke-width="14"/><rect x="294" width="27" height="562" fill="url(#post)"/><rect x="625" width="28" height="562" fill="url(#post)"/><rect x="838" width="24" height="562" fill="url(#post)"/><path d="M0 0H865V22H0Z" fill="#202f24"/><path d="M0 523H865V562H0Z" fill="#17241c"/></svg>`}
 function portrait(h){return `<svg class="portrait" viewBox="0 0 350 400" aria-label="馬房の競走馬"><defs><linearGradient id="coat" x1="0" y1=".3" x2="1" y2=".7"><stop stop-color="#2f211c"/><stop offset=".34" stop-color="${h.color}"/><stop offset=".7" stop-color="${h.color}"/><stop offset="1" stop-color="#35231f"/></linearGradient><linearGradient id="muzzle" x2="0" y2="1"><stop stop-color="#65483e"/><stop offset="1" stop-color="#251f1d"/></linearGradient><linearGradient id="rail" x2="0" y2="1"><stop stop-color="#a3ad92"/><stop offset=".45" stop-color="#667c71"/><stop offset="1" stop-color="#37463c"/></linearGradient></defs><path d="M50 392Q34 315 76 242Q98 205 118 157L142 105Q150 72 178 57Q199 55 215 77L242 99Q259 119 252 145L233 177Q212 215 194 262L195 392Z" fill="url(#coat)" stroke="#342823" stroke-width="2"/><path d="M112 193Q125 110 152 72Q168 54 190 66L193 101Q167 120 150 165Q128 215 107 236Z" fill="#241d1b"/><path d="M167 73Q143 33 152 12Q173 17 183 60M204 69Q221 26 235 23Q240 50 218 82" fill="url(#coat)" stroke="#332621" stroke-width="3"/><path d="M158 23L177 61 166 53Z M230 34L216 64 215 53Z" fill="#b17d6c"/><path d="M172 64Q195 47 220 75Q241 84 248 111L257 154Q275 181 263 204Q251 222 229 219Q209 215 199 198L182 157Q155 124 160 94Z" fill="url(#coat)" stroke="#403029" stroke-width="2"/><path d="M181 63Q197 49 217 67L228 90 205 76 209 98 185 84 173 108 165 89Z" fill="#2d2420"/><path d="M204 85L215 109 213 133 226 160 219 165 204 139 201 112 193 91Z" fill="#ebe2ca" opacity=".94"/><path d="M229 110Q243 105 245 118Q237 130 229 120Z" fill="#221b18"/><circle cx="239" cy="115" r="2.2" fill="#d9e2d6"/><path d="M215 173Q241 159 263 179Q275 201 252 216Q230 220 218 201Z" fill="url(#muzzle)"/><ellipse cx="253" cy="190" rx="7" ry="10" transform="rotate(25 253 190)" fill="#181817"/><path d="M238 211Q251 210 260 206" stroke="#171716" stroke-width="2" fill="none"/><path d="M109 256Q143 225 164 230Q140 272 151 342" stroke="#f7d4af" stroke-opacity=".15" stroke-width="10" fill="none"/><rect x="5" y="316" width="340" height="14" rx="2" fill="url(#rail)" stroke="#303d34"/><rect x="5" y="361" width="340" height="14" rx="2" fill="url(#rail)" stroke="#303d34"/></svg>`}
 function switchHorse(d){let n=state.horses.length;if(!n)return;let i=state.horses.findIndex(h=>h.id===state.selected);selectHorse(state.horses[(i+d+n)%n].id)}
-function stable(){let h=current();if(!h)return `<div class="stable-screen empty-stable">${backdrop()}<div class="glass-card"><h2>空き馬房</h2><p>生産から競走馬を迎えよう</p><button class="gold" onclick="go('breed')">競走馬を生産</button></div></div>`;let next=h.entry?races.find(r=>r.id===h.entry.id):null;let rate=v=>!h.debutDone&&!h.legendOrigin?'？':v>=78?'◎':v>=59?'○':v>=43?'△':'？';return `<div class="stable-screen">${backdrop()}<div class="horse-picker"><button class="title-chip" onclick="openRoster()">一覧</button><button class="title-chip" onclick="newProduction()">新規生産</button><button class="title-chip title-badge" onclick="openMenu('titles')">★ ${esc(titleBadge(h))}</button><button class="title-chip omakase-chip" aria-pressed="${h.autoCourse===-2}" onclick="toggleOmakase()">おまかせ育成 ${h.autoCourse===-2?'ON':'OFF'}</button><select aria-label="競走馬選択" onchange="selectHorse(this.value)">${state.horses.map(v=>`<option value="${v.id}" ${v.id===h.id?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div><div class="top-program"><div class="program"><small>レーシングプログラム</small>${esc(currentProgram().map(r=>r.name).join(' / ')||'通常開催')}</div><button class="weekbox nextweek" onclick="weekDialog()">${dateLabel()} ▶</button></div><aside class="horse-info"><div class="glass-card schedule-box"><strong>次走予定</strong><span>${next?esc(nextRaceLabel(h,next)):status(h)}</span></div><div class="glass-card"><div class="horse-name"><span>${esc(h.name)}</span><b>${h.weight}kg</b></div><div class="details-grid"><span>${h.sex}${3+Math.max(0,state.yearStart+Math.floor(state.clock/52)-h.bornYear)}　${h.style}</span><span>${h.gen}代目</span><span>引退まで</span><span>${h.week} 週</span><span>競走成績</span><span>${h.results.length}戦 ${wins(h)}勝</span><span>獲得賞金</span><span>${(h.earnings||0).toLocaleString()}枚</span><span>調子</span><span>${h.condition>=80?'絶好調':h.condition>=60?'好調':h.condition>=40?'普通':'不調'}</span></div><div class="mini-bar"><i style="width:${clamp(h.condition)}%"></i></div><div class="apt-grid"><div>距離適性<b>${Math.max(1000,horseRange(h)[0])}–${horseRange(h)[1]}</b></div><div>気性<b>${temperWord(h)}</b></div><div>芝<b>${!h.debutDone&&!h.legendOrigin?'？':h.apt==='芝'||h.dualSurface?'◎':'△'}</b></div><div>ダート<b>${!h.debutDone&&!h.legendOrigin?'？':h.apt==='ダート'||h.dualSurface?'◎':'△'}</b></div><div>スタート<b>${statMark(h,'start')}</b></div><div>瞬発力<b>${statMark(h,'burst')}</b></div><div>勝負根性<b>${statMark(h,'power')}</b></div><div>脚質<b>${esc(h.specialStyle||h.style)}</b></div><div>道悪<b>${!h.debutDone&&!h.legendOrigin?'？':displayRank(h.mud||45,h.legendOrigin)}</b></div></div><div class="info-buttons"><button class="silver" onclick="openMenu('history')">戦績</button><button class="silver" onclick="openMenu('pedigree')">血統表</button><button class="silver" onclick="openMenu('detail')">詳細</button></div></div></aside><div class="horse-stage individual-stall" role="group" aria-label="馬房の${esc(h.name)}">${horseFigure(h,state.stallCloseup?'head':'adult')}<button class="inspect38" onclick="inspectModel()">3Dで見る</button><button class="stall-view" aria-pressed="${!!state.stallCloseup}" onclick="state.stallCloseup=!state.stallCloseup;render()">${state.stallCloseup?'全身':'馬装を見る'}</button><button class="horse-inspect"  onclick="openMenu('detail')" aria-label="競走馬の詳細"></button><button class="arrow left" aria-label="前の馬" onclick="switchHorse(-1)">❮</button><button class="arrow right" aria-label="次の馬" onclick="switchHorse(1)">❯</button></div><aside class="actions-side"><button class="pill-action red" onclick="transferToBreeding()">${h.week===0?'繁殖入りへ':'引退・繁殖入り'}</button>${!h.debutDone?`<button class="pill-action red" onclick="openMenu('condition')">デビュー<small class="pill-sub">条件戦 ${h.conditionResults.length}/3</small></button>`:h.entry?`<button class="pill-action red" onclick="openMenu('race')">${h.entry.at<=state.clock?'今週の出走へ':'次走予定'}</button>`:`<button class="pill-action red" onclick="openMenu('race')" ${!ready(h)?'disabled':''}>出走</button>`}${h.location==='pasture'?`<button class="pill-action green" onclick="returnStable()">入厩</button>`:`<button class="pill-action green" onclick="openMenu('rest')" ${!ready(h)||h.entry||h.trainUsed||h.feedUsed?'disabled':''}>放牧</button>`}<button class="pill-action purple" onclick="openMenu('center')" ${h.location==='center'?'':!ready(h)||h.entry||h.trainUsed||h.feedUsed?'disabled':''}>トレセン${h.centerJob?' 残'+h.centerJob.left+'週':''}</button><button class="silver" onclick="openMenu('hint')">ヒント</button></aside><div class="action-bottom"><div class="stable-status"><b>${esc(state.stableName||'クロニクル厩舎')}　${state.horses.length}/${stallCount()}頭</b><span>${esc(state.log[0]||'育成を開始しましょう')}</span></div><div class="bottom-buttons"><button class="pill-action green" onclick="openMenu('train')" ${!ready(h)||h.trainUsed?'disabled':''}><span class="icon">🏇</span>${h.trainUsed?'調教済':'調教'}</button><button class="pill-action red" onclick="openMenu('feed')" ${!ready(h)||h.feedUsed?'disabled':''}><span class="icon">🥕</span>${h.feedUsed?'飼葉済':'飼葉'}</button></div><div class="small-menu"><button class="gold" onclick="weekDialog()">週送り ▶</button><button class="silver" onclick="openMenu('horse')">競走馬メニュー</button><button class="silver" onclick="go('breed')">生産・配合</button></div></div></div>${trainingSummary(h)}`}
+function stable(){let h=current();if(!h)return `<div class="stable-screen empty-stable">${backdrop()}<div class="glass-card"><h2>空き馬房</h2><p>生産から競走馬を迎えよう</p><button class="gold" onclick="go('breed')">競走馬を生産</button></div></div>`;let next=h.entry?races.find(r=>r.id===h.entry.id):null;let rate=v=>!h.debutDone&&!h.legendOrigin?'？':v>=78?'◎':v>=59?'○':v>=43?'△':'？';return `<div class="stable-screen">${backdrop()}<div class="horse-picker"><button class="title-chip" onclick="openRoster()">一覧</button><button class="title-chip" onclick="newProduction()">新規生産</button><button class="title-chip title-badge" onclick="openMenu('titles')">★ ${esc(titleBadge(h))}</button><button class="title-chip omakase-chip" aria-pressed="${h.autoCourse===-2}" onclick="toggleOmakase()">おまかせ育成 ${h.autoCourse===-2?'ON':'OFF'}</button><select aria-label="競走馬選択" onchange="selectHorse(this.value)">${state.horses.map(v=>`<option value="${v.id}" ${v.id===h.id?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div><div class="top-program"><div class="program"><small>レーシングプログラム</small>${esc(currentProgram().map(r=>r.name).join(' / ')||'通常開催')}</div><button class="weekbox nextweek" onclick="weekDialog()">${dateLabel()} ▶</button></div><aside class="horse-info"><div class="glass-card schedule-box"><strong>次走予定</strong><span>${next?esc(nextRaceLabel(h,next)):status(h)}</span></div><div class="glass-card"><div class="horse-name"><span>${esc(h.name)}</span><b>${h.weight}kg</b></div><div class="details-grid"><span>${h.sex}${3+Math.max(0,state.yearStart+Math.floor(state.clock/52)-h.bornYear)}　${h.style}</span><span>${h.gen}代目</span><span>引退まで</span><span>${h.week} 週</span><span>競走成績</span><span>${h.results.length}戦 ${wins(h)}勝</span><span>獲得賞金</span><span>${(h.earnings||0).toLocaleString()}枚</span><span>調子</span><span>${h.condition>=80?'絶好調':h.condition>=60?'好調':h.condition>=40?'普通':'不調'}</span></div><div class="mini-bar"><i style="width:${clamp(h.condition)}%"></i></div><div class="apt-grid"><div>距離適性<b>${Math.max(1000,horseRange(h)[0])}–${horseRange(h)[1]}</b></div><div>気性<b>${temperWord(h)}</b></div><div>芝<b>${!h.debutDone&&!h.legendOrigin?'？':h.apt==='芝'||h.dualSurface?'◎':'△'}</b></div><div>ダート<b>${!h.debutDone&&!h.legendOrigin?'？':h.apt==='ダート'||h.dualSurface?'◎':'△'}</b></div><div>スタート<b>${statMark(h,'start')}</b></div><div>瞬発力<b>${statMark(h,'burst')}</b></div><div>勝負根性<b>${statMark(h,'power')}</b></div><div>脚質<b>${esc(h.specialStyle||h.style)}</b></div><div>道悪<b>${!h.debutDone&&!h.legendOrigin?'？':displayRank(h.mud||45,h.legendOrigin)}</b></div></div><div class="info-buttons"><button class="silver" onclick="openMenu('history')">戦績</button><button class="silver" onclick="openMenu('pedigree')">血統表</button><button class="silver" onclick="openMenu('detail')">詳細</button></div></div></aside><div class="horse-stage individual-stall" role="group" aria-label="馬房の${esc(h.name)}">${horseFigure(h,state.stallCloseup?'head':'adult')}${state.devMode?'<button class="inspect38" onclick="inspectModel()">3Dで見る</button>':''}<button class="stall-view" aria-pressed="${!!state.stallCloseup}" onclick="state.stallCloseup=!state.stallCloseup;render()">${state.stallCloseup?'全身':'馬装を見る'}</button><button class="horse-inspect"  onclick="openMenu('detail')" aria-label="競走馬の詳細"></button><button class="arrow left" aria-label="前の馬" onclick="switchHorse(-1)">❮</button><button class="arrow right" aria-label="次の馬" onclick="switchHorse(1)">❯</button></div><aside class="actions-side"><button class="pill-action red" onclick="transferToBreeding()">${h.week===0?'繁殖入りへ':'引退・繁殖入り'}</button>${!h.debutDone?`<button class="pill-action red" onclick="openMenu('condition')">デビュー<small class="pill-sub">条件戦 ${h.conditionResults.length}/3</small></button>`:h.entry?`<button class="pill-action red" onclick="openMenu('race')">${h.entry.at<=state.clock?'今週の出走へ':'次走予定'}</button>`:`<button class="pill-action red" onclick="openMenu('race')" ${!ready(h)?'disabled':''}>出走</button>`}${h.location==='pasture'?`<button class="pill-action green" onclick="returnStable()">入厩</button>`:`<button class="pill-action green" onclick="openMenu('rest')" ${!ready(h)||h.entry||h.trainUsed||h.feedUsed?'disabled':''}>放牧</button>`}<button class="pill-action purple" onclick="openMenu('center')" ${h.location==='center'?'':!ready(h)||h.entry||h.trainUsed||h.feedUsed?'disabled':''}>トレセン${h.centerJob?' 残'+h.centerJob.left+'週':''}</button><button class="silver" onclick="openMenu('hint')">ヒント</button></aside><div class="action-bottom"><div class="stable-status"><b>${esc(state.stableName||'クロニクル厩舎')}　${state.horses.length}/${stallCount()}頭</b><span>${esc(state.log[0]||'育成を開始しましょう')}</span></div><div class="bottom-buttons"><button class="pill-action green" onclick="openMenu('train')" ${!ready(h)||h.trainUsed?'disabled':''}><span class="icon">🏇</span>${h.trainUsed?'調教済':'調教'}</button><button class="pill-action red" onclick="openMenu('feed')" ${!ready(h)||h.feedUsed?'disabled':''}><span class="icon">🥕</span>${h.feedUsed?'飼葉済':'飼葉'}</button></div><div class="small-menu"><button class="gold" onclick="weekDialog()">週送り ▶</button><button class="silver" onclick="openMenu('horse')">競走馬メニュー</button><button class="silver" onclick="go('breed')">生産・配合</button></div></div></div>${trainingSummary(h)}`}
 function legendCatalogue(page=0){return legendCatalogueView(page)}
 function selectLegend(id){
  const h=studs.find(v=>v.id===id);if(!h||!state.progress.legends[id])return;
@@ -917,7 +917,7 @@ function planTraining(i){
 }
 function chooseTraining(i,strength){const h=current(),before={stats:{...h.stats},weight:h.weight,condition:h.condition};closeMenu();const used=h.trainUsed;train(i,strength);if(!used&&h.trainUsed&&!state.skipCare)careReceipt(h,before,'調教')}
 function trainingWeight(i,strength){if(i===3)return 0;if(i===4)return -2;if(i===5)return 3;return -[0,4,6][[0,1,2,6,8].includes(i)?strength:1]}
-function train(i,strength=1){let h=current();if(!ready(h)||h.trainUsed)return;if([3,4].includes(i)&&stableLevel()<2)return;const intensity=[0,1,2,6,8].includes(i)?clamp(strength,0,2):1;if(!chargeListedFee(4))return;applyWorkout(h,i,intensity,false);render()}
+function train(i,strength=1){let h=current();if(!ready(h)||h.trainUsed)return;if([3,4].includes(i)&&stableLevel()<2)return;const intensity=[0,1,2,6,8].includes(i)?clamp(strength,0,2):1;if(!chargeListedFee(4))return;applyWorkout(h,i,intensity,false);questCount('train');render()}
 function applyWorkout(h,i,intensity,automatic){const previousStats={...h.stats};let w=workouts[i], growth=growthFactor(h)*[.75,1,1.35][intensity];for(let [k,v] of Object.entries(w[2]))if(intensity!==0||k===Object.keys(w[2])[0])h.stats[k]=clamp(h.stats[k]+v*growth*(1-h.fatigue*.005),0,h.cap);h.fatigue=clamp(h.fatigue+w[3]*[.8,1,1.3][intensity]);h.condition=clamp(h.condition+(i===5?7:h.fatigue>70?-7:4));h.weight=clamp(h.weight+trainingWeight(i,intensity),h.ideal-35,Math.max(h.weight,h.ideal+35));h.training+=i===5?0:1;h.quality=clamp(h.quality+(i===5?0:.42),0,h.cap);h.lastWorkout={at:state.clock,name:(automatic?'自動・':'')+w[0],gains:Object.keys(w[2]).map(k=>({key:k,from:previousStats[k],to:h.stats[k]}))};advanceReveal(h);h.trainUsed=true;state.trainedDay=localDay();log(`${h.name}：${h.lastWorkout.name}を実施`)}
 function advance(h){betweenWeeks(h);h.week=Math.max(0,h.week-1);h.spent++;if(h.spent%10===0&&h.spent<=30)h.ideal+=2;h.feedUsed=false;h.trainUsed=false}function campaignQueue(h){return h.rotation||[]}
 function startsInCareer(h){
@@ -1035,7 +1035,7 @@ function campaign(){
  <button onclick="weekendBoard()">全頭の予定・前週の結果</button><button onclick="go('stable')">厩舎へ戻る</button></article></div></section>`
 }
 
-function feed(i){let h=current();if(!ready(h)||h.feedUsed)return;let f=feeds[i];if(!f||i>=5&&stableLevel()<5||i===3&&!state.progress.inventory.feed)return;if(i!==3&&!chargeListedFee(2))return;if(i===3)state.progress.inventory.feed--;applyMeal(h,i,false);render()}
+function feed(i){let h=current();if(!ready(h)||h.feedUsed)return;let f=feeds[i];if(!f||i>=5&&stableLevel()<5||i===3&&!state.progress.inventory.feed)return;if(i!==3&&!chargeListedFee(2))return;if(i===3)state.progress.inventory.feed--;applyMeal(h,i,false);questCount('feed');render()}
 function applyMeal(h,i,automatic){const f=feeds[i];h.fatigue=clamp(h.fatigue+f[2]);h.weight=clamp(h.weight+f[3],h.ideal-35,Math.max(h.weight,h.ideal+35));h.condition=clamp(h.condition+f[4]);if(i>=2){h.stats.stamina=clamp(h.stats.stamina+.45,0,h.cap);h.quality=clamp(h.quality+.25,0,h.cap)}h.feedUsed=true;log(`${h.name}：${automatic?'自動・':''}${f[0]}を給餌`)}
 function parents(sex){return [...studs.filter(unlocked).map(h=>({...h,quality:h.quality+(state.progress.awake[h.id]||0)*2})),...state.retired].filter(h=>h.sex===sex||h.sex==='牡・牝')}const charmTypes={charm:['成長のお守り','素質上限 +4'],swift:['疾風のお守り','スピード +6'],endure:['持久のお守り','スタミナ +6'],turf:['芝のお守り','芝適性を追加'],sand:['砂のお守り','ダート適性を追加'],travel:['遠征のお守り','遠征適性 +15'],abroad:['海外のお守り','海外競走への適性を強化'],evolve:['特性進化のお守り','特性が進化しやすくなる'],lineage:['継承のお守り','素質の高い親の距離適性を継承']};
 function legendSource(a,b){
@@ -1126,7 +1126,7 @@ function reviewProduction(commit=false){
    facilityView('pairHelp','レジェンド生産の条件', '<p>この親の組み合わせではレジェンド生産ができません。カタログで解放条件を確認できます。</p><button onclick="inspectMates()">配合相手を比較</button><button onclick="legendCatalogue()">レジェンドカタログ</button><button onclick="normalProductionMode()">通常生産に切り替える</button>');return
  }
  if(state.medals<cost){
-   facilityView('pairHelp','生産メダルが不足しています',`<p>必要 ${cost}枚 ／ 所持 ${state.medals}枚（あと${cost-state.medals}枚）</p><button onclick="homeInfo('daily')">日替わり支給を確認</button>`);return
+   facilityView('pairHelp','生産メダルが不足しています',`<p>必要 ${cost}枚 ／ 所持 ${state.medals}枚（あと${cost-state.medals}枚）</p><button onclick="homeInfo('quest')">クエストを確認</button>`);return
  }
  const full=state.horses.length>=stallCount();
  if(!commit){
@@ -1141,7 +1141,7 @@ function reviewProduction(commit=false){
  closeMenu();if(full)state.stallExpansion=stallCount()+1;
  produce(a,b,cost);
 }
-function produce(a,b,cost){useCharge(a.id);useCharge(b.id);let name=(fixedPairs.has(a.name+'|'+b.name)?pick(fixedPairs.get(a.name+'|'+b.name)):'')||pick(['アステル','ノース','グラン','シルク','ルミナス'])+pick(['クラウン','スター','ウィンド','ベル','ロード']);if(!a||!b)return;
+function produce(a,b,cost){useCharge(a.id);useCharge(b.id);questCount('breed');let name=(fixedPairs.has(a.name+'|'+b.name)?pick(fixedPairs.get(a.name+'|'+b.name)):'')||pick(['アステル','ノース','グラン','シルク','ルミナス'])+pick(['クラウン','スター','ウィンド','ベル','ロード']);if(!a||!b)return;
 const legend=breedMode==='legend';
 if(legend&&!legendPair(a,b))return;
 let h=foal(a,b,name);const evo0=!!h.traitEvolved;h.bornYear=state.yearStart+Math.floor(state.clock/52);h.earnings=0;state.medals-=cost;h.whiteMark=h.look[1]>=160?'流星':h.look[1]>=64?'星':'なし';h.health=round(rand(45,85));h.travel=round(rand(40,80));h.mud=round(rand(40,80));
@@ -1266,8 +1266,8 @@ function historicRaceKey(r){
  const normalized=r.name.normalize('NFKC');
  return ({'ヴィクトリアM':'ヴィクトリアマイル','日本ダービー':'東京優駿','オークス':'優駿牝馬','ジャパンカップ':'ジャパンC','マイルチャンピオンシップ':'マイルCS','フェブラリーステークス':'フェブラリーS'})[normalized]||normalized
 }
-function rivalField(r,at,horses){
- const count=Math.max(0,(['招待','決勝'].includes(r.grade)?12:8)-horses.length),field=[],used=new Set(horses.map(h=>h.name));
+function rivalField(r,at,horses,size=null){
+ const count=Math.max(0,(size||(['招待','決勝'].includes(r.grade)?12:8))-horses.length),field=[],used=new Set(horses.map(h=>h.name));
  function add(name,kind,bonus=0,alumnus=null){
   if(field.length>=count||used.has(name))return;
   used.add(name);field.push({name,kind,alumnus,ability:alumnus?(r.level+alumnus.quality)/2:r.level+bonus})
@@ -1306,14 +1306,14 @@ function practiceField(){
 }
 
 function records(){let all=[...state.horses,...state.retired].sort((a,b)=>(b.earnings||0)-(a.earnings||0));return `<div class="panel"><h2>厩舎戦績・殿堂</h2><div class="honour-gate"><button onclick="go('studbook')">年鑑・産駒成績</button><button onclick="hallHub('series')">殿堂馬シリーズ</button><button onclick="hallHub('cup')">プレミアカップ</button><button onclick="hallHub('shop')">シリーズショップ</button></div><p class="muted" style="margin:8px 0">全 ${all.length}頭 / ${all.reduce((s,h)=>s+wins(h),0)}勝</p>${all.map(h=>`<details class="panel"><summary><span class="record35">${horseFigure(h,'head')}</span><b>${esc(h.name)}</b>　第${h.gen}世代 · 賞金 ${h.earnings||0}枚 ${h.retired&&h.earnings>=3000?'★ 殿堂馬':''} · ${h.retired?'繁殖馬':'現役'}　${wins(h)}勝 / ${h.results.length}戦 ${h.titles.length?'<span class="tag">タイトル '+h.titles.length+'</span>':''}</summary>${h.retired?`<button onclick="breedFromRetired('${h.id}')">この馬で次世代を生産</button>`:''}<p class="muted" style="margin:12px 0">父：${esc(h.parents[0])}　母：${esc(h.parents[1])}</p><div class="tablewrap"><table><thead><tr><th>レース</th><th>グレード</th><th>着順</th><th>賞金</th><th>距離</th></tr></thead><tbody>${h.results.map(r=>`<tr><td>${esc(r.name)}</td><td>${gradeLabel(r.grade)}</td><td>${r.place}着</td><td>${r.prize??award(r.grade,r.place)}枚</td><td>${r.distance}m　${albumButton(h,r)}</td></tr>`).join('')||'<tr><td colspan="4">まだ出走していません</td></tr>'}</tbody></table></div></details>`).join('')}</div><div class="panel"><h3>厩舎日誌</h3>${state.log.map(x=>`<div class="log">${esc(x)}</div>`).join('')}</div>`}
-function settings(){return `<div class="panel"><h2>厩舎設定・データ管理</h2><div class="setup35"><section><h3>厩舎・観戦設定</h3>${openingSeasonControl()}<button onclick="assetPanel()">画像素材の差し替え</button><label>厩舎名<input maxlength="16" value="${esc(state.stableName||'クロニクル厩舎')}" onchange="state.stableName=this.value.trim().slice(0,16)||'クロニクル厩舎';save()"></label>${optControls()}<p><button type="button" onclick="toggleFullscreen()">全画面表示</button></p><p class="notice">iPhoneのSafariではボタン操作で全画面にできません。Safariの共有ボタンから「ホーム画面に追加」を選び、追加したアイコンから起動すると全画面（スタンドアロン表示）で遊べます。</p><p><label><input type="checkbox" ${state.returnHome?'checked':''} onchange="state.returnHome=this.checked;save()"> 週送り後にホームへ戻る</label></p><p><label><input type="checkbox" ${state.eventPreview!==false?'checked':''} onchange="state.eventPreview=this.checked;save()"> 季節杯のホーム通知</label></p></section><section><h3>保存・引き継ぎ</h3><button onclick="titleScreen()">厩舎スロットを選ぶ</button><p class="notice">ブラウザ内で自動保存します。端末やブラウザを変更する前にバックアップを作成してください。</p><p>4週ごとに、週送り前の厩舎を復元ポイントに保存します。</p><button onclick="storeCheckpoint(true)">今の状態で復元ポイントを更新</button><button onclick="loadCheckpoint()">復元ポイントを読み込む</button><div class="row"><button onclick="exportSave()">バックアップを書き出す</button><button onclick="document.getElementById('import').click()">バックアップを読み込む</button><input id="import" type="file" accept=".json,application/json" hidden onchange="importSave(this)"><button onclick="textBackup()">テキストで引き継ぎ</button><button class="danger" onclick="resetSave()">初期化</button></div></section></div></div>`}function exportSave(){let u=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='thoroughbred-save.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}function importSave(el){const file=el.files[0];if(!file)return;el.value='';file.text().then(readBackup).catch(()=>gameNotice('ファイルを読み取れませんでした。'))}async function resetSave(){if(await askOwner('全データを初期化しますか？')){state=initial();lastDraw=null;normalize();state.selected=state.horses[0].id;storeCheckpoint();render()}}
+function settings(){return `<div class="panel"><h2>厩舎設定・データ管理</h2><div class="setup35"><section><h3>厩舎・観戦設定</h3>${openingSeasonControl()}<label>厩舎名<input maxlength="16" value="${esc(state.stableName||'クロニクル厩舎')}" onchange="state.stableName=this.value.trim().slice(0,16)||'クロニクル厩舎';save()"></label>${optControls()}<p><button type="button" onclick="toggleFullscreen()">全画面表示</button></p><p class="notice">iPhoneのSafariではボタン操作で全画面にできません。Safariの共有ボタンから「ホーム画面に追加」を選び、追加したアイコンから起動すると全画面（スタンドアロン表示）で遊べます。</p><p><label><input type="checkbox" ${state.returnHome?'checked':''} onchange="state.returnHome=this.checked;save()"> 週送り後にホームへ戻る</label></p><p><label><input type="checkbox" ${state.eventPreview!==false?'checked':''} onchange="state.eventPreview=this.checked;save()"> 季節杯のホーム通知</label></p></section><section><h3>保存・引き継ぎ</h3><button onclick="titleScreen()">厩舎スロットを選ぶ</button><p class="notice">ブラウザ内で自動保存します。端末やブラウザを変更する前にバックアップを作成してください。</p><p>4週ごとに、週送り前の厩舎を復元ポイントに保存します。</p><button onclick="storeCheckpoint(true)">今の状態で復元ポイントを更新</button><button onclick="loadCheckpoint()">復元ポイントを読み込む</button><div class="row"><button onclick="exportSave()">バックアップを書き出す</button><button onclick="document.getElementById('import').click()">バックアップを読み込む</button><input id="import" type="file" accept=".json,application/json" hidden onchange="importSave(this)"><button onclick="textBackup()">テキストで引き継ぎ</button><button class="danger" onclick="resetSave()">初期化</button></div></section></div></div>`}function exportSave(){let u=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download='thoroughbred-save.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}function importSave(el){const file=el.files[0];if(!file)return;el.value='';file.text().then(readBackup).catch(()=>gameNotice('ファイルを読み取れませんでした。'))}async function resetSave(){if(await askOwner('全データを初期化しますか？')){state=initial();lastDraw=null;normalize();state.selected=state.horses[0].id;storeCheckpoint();render()}}
 
 function homeHorse(id){state.selected=id;go('stable')}
-function homeInfo(kind){if(['predict','daily','archive','office','shrine','gifts','auction'].includes(kind)){showExtra(kind);return}let title='',content='';let all=[...state.horses,...state.retired];if(kind==='farm'){title='農園';content=farmPanel()}
+function homeInfo(kind){if(kind==='daily'){state.gachaTab='normal';kind='gacha'}if(['predict','archive','office','shrine','gifts','auction'].includes(kind)){showExtra(kind);return}let title='',content='';let all=[...state.horses,...state.retired];if(kind==='farm'){title='農園';content=farmPanel()}
 else if(kind==='quest'){title='クエスト';content=questPanel(all)}
 else if(kind==='collection'){title='株券図鑑';content=collectionPanel()}
 else if(kind==='gacha'){title='株券ガチャ';content=gachaPanel()}
-else if(kind==='event'){title='牧場フェスティバル杯';content=`<p class="notice">今月の特効株券 ${seasonalFeatured().map(v=>esc(v.name)).join('、')}。毎月の最終週に開催。現役戦で1勝した競走馬が登録できます。</p><p>次回開催：${dateLabel(nextDate(races.find(r=>r.event)))}</p><button onclick="closeMenu();go('stable');openMenu('race')">出走登録へ</button>`}else if(kind==='simulation'){title='シミュレース';let h=current();content=`<p class="notice">シミュレーション専用。育成週数・疲労・素質・戦績は変化しません。</p>${h?`<p>試走する馬：${esc(h.name)}</p>${calendarRaces.map(r=>`<div class="race"><span class="grade">${gradeLabel(r.grade)}</span><b>${esc(r.name)}</b><small>${r.apt} ${r.distance}m</small><button onclick="closeMenu();runRace('${r.id}',true)">試走</button></div>`).join('')}`:'<p>試走するには競走馬を生産してください。</p>'}`}else if(kind==='program'){const h=current();title='レーシングプログラム';content=programTools()+`<p class="notice">${dateLabel()}　<button onclick="closeMenu();nextWeek()">週送り ▶</button></p>`+calendarRaces.filter(r=>programmeDate(r)!==null).sort((a,b)=>programmeDate(a)-programmeDate(b)).map(r=>`<div class="race program-race" data-program="${r.id}"><span class="grade">${gradeLabel(r.grade)}</span><b>${esc(r.name)}</b><small>${dateLabel(programmeDate(r))} / ${r.apt} ${r.distance}m</small>${h?.debutDone&&!h.entry?`<button ${eligible(h,r,programmeDate(r))?'disabled':''} onclick="prepareEntry('${r.id}',${programmeDate(r)})">${esc(eligible(h,r,programmeDate(r))||'登録')}</button>`:''}</div>`).join('')+`<button onclick="closeMenu();go('stable');openMenu('race')">出走登録へ</button>`}else{title='厩舎ニュース';content=state.log.slice(0,8).map(x=>`<p class="notice">${esc(x)}</p>`).join('')} facilityView(kind,title,content);if(kind==='program')filterProgramme()}
+else if(kind==='event'){title=festivalName();content=`<p class="notice">${esc(festivalName())}開催中！ 特効株券の産駒が出走すると季節杯のポイントが増えます。毎月の最終週に開催。現役戦で1勝した競走馬が登録できます。</p><div class="feature-list">${seasonalFeatured().map(v=>`<div>${cardBadge(v)}<b>${esc(v.name)}</b><span class="boost">特効 +${Math.min(400,featuredPct(v))}%</span></div>`).join('')||'<p>今月の特効株券はありません。</p>'}</div><p>次回開催：${dateLabel(nextDate(races.find(r=>r.event)))}</p><button onclick="closeMenu();go('stable');openMenu('race')">出走登録へ</button>`}else if(kind==='simulation'){title='シミュレース';let h=current();content=`<p class="notice">シミュレーション専用。育成週数・疲労・素質・戦績は変化しません。</p>${h?`<p>試走する馬：${esc(h.name)}</p>${calendarRaces.map(r=>`<div class="race"><span class="grade">${gradeLabel(r.grade)}</span><b>${esc(r.name)}</b><small>${r.apt} ${r.distance}m</small><button onclick="closeMenu();runRace('${r.id}',true)">試走</button></div>`).join('')}`:'<p>試走するには競走馬を生産してください。</p>'}`}else if(kind==='program'){const h=current();title='レーシングプログラム';content=programTools()+`<p class="notice">${dateLabel()}　<button onclick="closeMenu();nextWeek()">週送り ▶</button></p>`+calendarRaces.filter(r=>programmeDate(r)!==null).sort((a,b)=>programmeDate(a)-programmeDate(b)).map(r=>`<div class="race program-race" data-program="${r.id}"><span class="grade">${gradeLabel(r.grade)}</span><b>${esc(r.name)}</b><small>${dateLabel(programmeDate(r))} / ${r.apt} ${r.distance}m</small>${h?.debutDone&&!h.entry?`<button ${eligible(h,r,programmeDate(r))?'disabled':''} onclick="prepareEntry('${r.id}',${programmeDate(r)})">${esc(eligible(h,r,programmeDate(r))||'登録')}</button>`:''}</div>`).join('')+`<button onclick="closeMenu();go('stable');openMenu('race')">出走登録へ</button>`}else{title='厩舎ニュース';content=state.log.slice(0,8).map(x=>`<p class="notice">${esc(x)}</p>`).join('')} facilityView(kind,title,content);if(kind==='program')filterProgramme()}
 let farmMap=false;
 function home(){
  if(farmMap)return ownerDesk();
@@ -1330,8 +1330,10 @@ function home(){
  <footer><button onclick="farmMap=true;render()">所有馬一覧・施設</button>${h&&!h.debutDone&&h.location==='stable'?`<button onclick="go('stable');openMenu('condition')">条件戦へ</button>`:''}<span>${esc(state.stableName||'厩舎')} Lv.${stableLevel()}　 🪙 ${state.medals.toLocaleString()}　◆ ${state.progress.gems}</span></footer></section>`;
 }
 function inventoryPage(){
- const p=state.progress,labels={feed:'配合飼料',apple:'高級リンゴ',banana:'バナナ',...Object.fromEntries(Object.entries(charmTypes).map(([k,v])=>[k,v[0]]))};
- facilityView('inventory','アイテム倉庫',`<div class="goods-grid">${Object.entries(labels).map(([id,n])=>`<article>${assetIcon(({feed:'hay',charm:'charm_growth',swift:'charm_speed',endure:'charm_stamina',turf:'charm_turf',sand:'charm_sand'})[id]||id)}<b>${n}</b><p>${p.inventory[id]||0}個</p></article>`).join('')}</div><p>${assetIcon('ticket')}ガチャチケット ${p.tickets}枚　富札 ${p.shrineTickets}枚　${assetIcon('key')}即完了キー ${p.centreKeys}個　${assetIcon('orb')}馬封石 ${p.gems}個　伝説の宝玉 ${p.legendOrbs||0}個</p>`)
+ const p=state.progress,charms=Object.fromEntries(Object.entries(charmTypes).map(([k,v])=>[k,[v[0],v[1]]]));
+ const crops=Object.fromEntries(Object.entries(FARM_CROPS).map(([k,c])=>[k,[c.name,'農園飼葉：'+c.effect]]));
+ const rows={...Object.fromEntries(Object.entries(ITEM_INFO).filter(([k])=>k!=='fuda').map(([k,v])=>[k,[v[0],v[1]]])),...charms,...crops};
+ facilityView('inventory','アイテム一覧',`<div class="goods-grid">${Object.entries(rows).filter(([id])=>(p.inventory[id]||0)>0||['feed','charm'].includes(id)).map(([id,[n,d]])=>`<article>${assetIcon(({feed:'hay',charm:'charm_growth',swift:'charm_speed',endure:'charm_stamina',turf:'charm_turf',sand:'charm_sand'})[id]||id)}<b>${esc(n)}</b><small>${esc(d)}</small><p>${p.inventory[id]||0}個</p></article>`).join('')}</div><dl class="param-tab"><dt>ガチャチケット</dt><dd>${p.tickets}枚 · 株券ガチャを引けます</dd><dt>富札</dt><dd>${p.shrineTickets||0}枚 · 神社の富くじ</dd><dt>即完了キー</dt><dd>${p.centreKeys||0}個 · トレセンを即完了</dd><dt>馬封石</dt><dd>${p.gems}個 · ガチャや主戦契約に使用</dd><dt>伝説の宝玉</dt><dd>${p.legendOrbs||0}個 · レジェンド解放</dd><dt>Mポイント</dt><dd>${(p.mpoints||0).toLocaleString()} · 株券交換所で使用</dd></dl>`,'戻る')
 }
 function ownerDesk(){
   const listed=state.horses.filter(h=>!state.horseFilter||[h.sex,h.location].includes(state.horseFilter)).sort((a,b)=>state.listOrder==='賞金'?b.earnings-a.earnings:state.listOrder==='残り週'?a.week-b.week:state.listOrder==='年齢'?a.bornYear-b.bornYear:0);
@@ -1349,7 +1351,7 @@ function ownerDesk(){
     <section class="ranch-body">${homeInvites()}<div class="hub-heading"><h2>所有馬</h2><button onclick="go('breed')">＋ 生産</button></div>
     <aside class="secretary-panel"><span class="staff-image portrait${state.secretary||0}" aria-hidden="true"></span><p><strong>厩舎担当</strong>${secretaries[state.secretary||0]}「${secretaryTip(current())}」</p></aside><div class="row"><label>並び順<select onchange="state.listOrder=this.value;render()">${['登録順','残り週','年齢','賞金'].map(v=>`<option ${v===state.listOrder?'selected':''}>${v}</option>`).join('')}</select></label><label>絞り込み<select onchange="state.horseFilter=this.value;render()">${[['','全頭'],['牡','牡馬'],['牝','牝馬'],['stable','入厩'],['pasture','放牧'],['center','トレセン']].map(([id,n])=>`<option value="${id}" ${state.horseFilter===id?'selected':''}>${n}</option>`).join('')}</select></label></div><div class="horse-list">${cards||'<p>表示できる競走馬がいません。絞り込みを変更するか、生産で仔馬を迎えましょう。</p>'}</div>
     <nav class="hub-nav">${[['厩舎','stable'],['生産','breed'],['戦績・血統','records'],['データ管理','settings']].map(([n,k])=>`<button onclick="go('${k}')">${n}</button>`).join('')}
-    ${[['株券図鑑','collection'],['株券ガチャ','gacha'],['農園','farm'],['神社','shrine'],['プレゼント','gifts'],['クエスト','quest'],['牧場事務所','office'],['馬券','predict'],['セリ市','auction'],['日替わり支給','daily'],['資料図鑑','archive'],['試走','simulation'],['季節杯','event'],['牧場日誌','news']].map(([n,k])=>`<button onclick="homeInfo('${k}')">${n}</button>`).join('')}
+    ${[['株券図鑑','collection'],['株券ガチャ','gacha'],['農園','farm'],['神社','shrine'],['プレゼント','gifts'],['クエスト','quest'],['牧場事務所','office'],['馬券','predict'],['セリ市','auction'],['季節杯','event'],['牧場日誌','news'],...(state.devMode?[['資料図鑑','archive'],['試走','simulation']]:[])].map(([n,k])=>`<button onclick="homeInfo('${k}')">${n}</button>`).join('')}
     <button onclick="inventoryPage()">アイテム倉庫</button><button onclick="farmMap=false;render()">牧場マップ</button></nav></section></section>`;
 }
 const riders=[['星野 澪','逃げ','芝','関東'],['森川 葵','先行','ダート','関西'],['沢村 陸','差し','芝','関東'],['月島 悠','追込','ダート','関西'],['朝霧 迅','先行','芝','関東'],['橘 蒼真','差し','ダート','関東'],['桐生 凪','逃げ','ダート','関東'],['柊 一颯','追込','芝','関東'],['水城 翔','先行','芝','関西'],['鷹野 隼人','差し','芝','関西'],['御影 律','逃げ','芝','関西'],['宗像 楓','追込','ダート','関西']];
@@ -1466,32 +1468,50 @@ function collectionPanel(){return collectionGrid()}
 function poolCards(){return studs.filter(c=>drawPool==='all'||c.sex===(drawPool==='sire'?'牡':'牝'))}
 function poolWeights(cards){const w=drawWeights.map((n,i)=>cards.some(c=>cardRank(c)===i)?n:0),sum=w.reduce((a,b)=>a+b,0);return w.map(n=>100*n/sum)}
 function gachaPanel(){
-  const weights=poolWeights(poolCards());const oddsMap={};['N','R','SR','SR','SSR','UR'].forEach((t,i)=>oddsMap[t]=(oddsMap[t]||0)+weights[i]);const odds=Object.entries(oddsMap).filter(([,v])=>v>0).map(([t,v])=>`${t} ${Number(v.toFixed(2))}%`).join(' ／ ');
-  return `<div class="draw-tabs">${[['all','全株券ガチャ'],['sire','牡馬ガチャ'],['dam','牝馬ガチャ']].map(([id,n])=>`<button aria-pressed="${drawPool===id}" onclick="if(drawPool!=='${id}'){lastDraw=null;drawPool='${id}';refreshFeature('gacha')}">${n}</button>`).join('')}</div><div class="gacha-display"><h3>${drawPool==='all'?'名馬株券':drawPool==='sire'?'牡馬ガチャ · 種牡馬株券限定':'牝馬ガチャ · 繁殖牝馬株券限定'}</h3>
-    <p>ガチャチケット <strong>${state.progress.tickets}枚</strong></p>
-    ${lastDraw?`<div class="draw-result" role="status">${horseArt({...lastDraw.horse,color:lastDraw.horse.color||'#966044'})}${cardBadge(lastDraw.horse)} <b>${esc(lastDraw.horse.name)}</b>
-    <span>${lastDraw.duplicate?'重複株券を獲得':'新しい株券を獲得'}</span></div>`:''}
-    <button class="gold" onclick="drawCard()" ${state.progress.tickets<1?'disabled':''}>チケット1枚で引く</button><button onclick="drawCard(10)" ${state.progress.tickets<10?'disabled':''}>チケット10枚で10連</button>${lastDraw?.batch?.length>1?`<p>${lastDraw.batch.map(esc).join(' ／ ')}</p>`:''}
-  </div><p class="notice">厩舎開設祝いとしてチケット20枚を配布済みです。現役レースで勝つとさらに1枚獲得します。</p>
-  ${state.progress.drawReceipt39?.length?'<button onclick="showDraw(10)">前回の獲得一覧</button>':''}<details><summary>提供割合</summary><p>${odds}</p></details>
-  <section class="paid-draw"><h3>メダルで回すガチャ</h3><p>SHガチャ：メダル5,000枚（伝説の宝玉・株券・メダル）／メダルガチャ：メダル3,000枚（アイテム類・伝説の宝玉）</p>
-  <p>${state.progress.paidDrawResult?esc(state.progress.paidDrawResult.kind)+'：'+esc(state.progress.paidDrawResult.name)+'を獲得':''}</p>
-  <button class="gold" onclick="paidDraw('sh')" ${state.medals<5000?'disabled':''}>SHガチャ（5,000枚）</button><button onclick="paidDraw('medal')" ${state.medals<3000?'disabled':''}>メダルガチャ（3,000枚）</button></section>
-  <section class="daily-draw"><h3>デイリーガチャ</h3><button onclick="dailyDraw()" ${state.progress.drawDay===localDay()?'disabled':''}>今日の無料ガチャ</button><p>${state.progress.dailyDrawResult?.day===localDay()?esc(state.progress.dailyDrawResult.name)+'を獲得':''}</p></section><button onclick="closeMenu();homeInfo('collection')">株券図鑑へ</button>`;
+ const tab=state.gachaTab||'rare',p=state.progress;
+ const tabs=[['rare','レア'],['event','イベント'],['ticket','チケット'],['normal','ノーマル'],['accessory','アクセサリ']];
+ const weights=poolWeights(poolCards());const oddsMap={};['N','R','SR','SR','SSR','UR'].forEach((t,i)=>oddsMap[t]=(oddsMap[t]||0)+weights[i]);const odds=Object.entries(oddsMap).filter(([,v])=>v>0).map(([t,v])=>`${t} ${Number(v.toFixed(2))}%`).join(' ／ ');
+ const banner=(pool,title,sub)=>`<article class="gacha-banner b-${pool}"><h3>${title}</h3><small>${sub}</small><div class="banner-buttons"><button class="gold" onclick="drawCard(1,'gem','${pool}')" ${p.gems<5?'disabled':''}>1回　馬封石×5</button><button onclick="drawCard(10,'gem','${pool}')" ${p.gems<50?'disabled':''}>10回　馬封石×50<em>おまけ＋1枚</em></button></div></article>`;
+ const body={
+  rare:()=>banner('sire','牡馬ガチャ','種牡馬株券限定')+banner('dam','牝馬ガチャ','繁殖牝馬株券限定'),
+  event:()=>`<article class="gacha-banner b-event"><h3>${esc(festivalName())} ピックアップ</h3><small>特効株券の排出率アップ：${seasonalFeatured().map(v=>esc(v.name)).join('、')||'対象なし'}</small><div class="banner-buttons"><button class="gold" onclick="drawCard(1,'gem','event')" ${p.gems<5||!seasonalFeatured().length?'disabled':''}>1回　馬封石×5</button><button onclick="drawCard(10,'gem','event')" ${p.gems<50||!seasonalFeatured().length?'disabled':''}>10回　馬封石×50<em>おまけ＋1枚</em></button></div></article>`,
+  ticket:()=>`<article class="gacha-banner b-ticket"><h3>チケットガチャ</h3><small>ガチャチケット ${p.tickets}枚　全株券から排出</small><div class="banner-buttons"><button class="gold" onclick="drawCard(1,'ticket','all')" ${p.tickets<1?'disabled':''}>チケット1枚</button><button onclick="drawCard(10,'ticket','all')" ${p.tickets<10?'disabled':''}>チケット10枚<em>おまけ＋1枚</em></button></div></article>`,
+  normal:()=>`<article class="gacha-banner b-normal"><h3>SHガチャ</h3><small>メダル5,000枚　伝説の宝玉・株券・メダル</small><button class="gold" onclick="paidDraw('sh')" ${state.medals<5000?'disabled':''}>SHガチャ（5,000枚）</button></article><article class="gacha-banner b-normal"><h3>メダルガチャ</h3><small>メダル3,000枚　アイテム類・伝説の宝玉</small><button onclick="paidDraw('medal')" ${state.medals<3000?'disabled':''}>メダルガチャ（3,000枚）</button></article><article class="gacha-banner b-daily"><h3>デイリーガチャ</h3><small>1日1回無料　馬封石・富札・即完了キー・メダル など</small><button onclick="dailyDraw()" ${p.drawDay===localDay()?'disabled':''}>${p.drawDay===localDay()?'本日分は受取済み':'今日の無料ガチャ'}</button></article>`,
+  accessory:()=>`<article class="gacha-banner b-acc"><h3>アクセサリガチャ</h3><small>メダル1,000枚　頭絡（馬装）が当たります。所持済みはメダル300枚に変換</small><button class="gold" onclick="accessoryDraw()" ${state.medals<1000?'disabled':''}>1回（1,000枚）</button><p>所持：${(p.gear||[]).map(i=>['','緋の頭絡','紺の頭絡','金の頭絡'][i]).join('・')||'なし'}</p></article>`
+ }[tab]||(()=>'');
+ return `<div class="gacha-layout"><nav class="gacha-tabs">${tabs.map(([k,n])=>`<button aria-pressed="${k===tab}" onclick="state.gachaTab='${k}';refreshFeature('gacha')">${n}</button>`).join('')}</nav><div class="gacha-main"><p class="gacha-wallet">馬封石 ${p.gems}個　ガチャチケット ${p.tickets}枚　メダル ${state.medals.toLocaleString()}枚　所持株券 ${cardHoldings()}/${cardCap()}</p>${body()}${state.progress.drawReceipt39?.length?'<button onclick="showDraw(10)">前回の獲得一覧</button>':''}<details><summary>提供割合</summary><p>${odds}</p></details><button onclick="closeMenu();homeInfo('collection')">株券図鑑へ</button></div></div>`;
 }
-function drawCard(count=1){
- if(locked||!$('menuDialog').open||$('menuDialog').dataset.view!=='gacha'||![1,10].includes(count)||state.progress.tickets<count)return;
- if(cardHoldings()+count>cardCap()){gameNotice('株券の所持枠がいっぱいです。図鑑で売却するか、所持枠を拡張してください。');return}
+function festivalName(){const m=months[state.clock%52][0];return ['新春名馬祭','早春名馬祭','桜花名馬祭','皐月名馬祭','ダービー祭','グランプリ祭','真夏名馬祭','残暑名馬祭','秋風名馬祭','天皇賞祭','ジャパンC祭','有馬記念祭'][m-1]}
+function featuredPct(h){return Number(String(h.source?.[6]||'').match(/特効[^%％]{0,6}?(\d{2,3})[%％]/)?.[1]||100)}
+function accessoryDraw(){
+ if(state.medals<1000)return;const p=state.progress;state.medals-=1000;p.gear??=[];const id=1+Math.floor(seeded()*3),name=['','緋の頭絡','紺の頭絡','金の頭絡'][id];
+ let text=name;if(p.gear.includes(id)){state.medals+=300;text=name+'（所持済み → メダル300枚）'}else p.gear.push(id);
+ sfx('gacha');save();itemReveal([{name:text,tier:'SR'}],()=>refreshFeature('gacha'));
+}
+function itemReveal(items,done){
+ const d=$('menuDialog');d.dataset.view='itemReveal';
+ $('menuContent').innerHTML=`<div class="item-reveal">${items.map((x,i)=>`<div class="flip-card" style="animation-delay:${i*.25}s"><div class="flip-inner"><div class="flip-back">${studSeal()}</div><div class="flip-front t-${esc(x.tier||'R')}"><small>${esc(x.tier||'')}</small><b>${esc(x.name)}</b>${x.fresh?'<em>NEW</em>':''}</div></div></div>`).join('')}<button class="gold" onclick="(${done?'window.__revealDone&&window.__revealDone()':'closeMenu()'})">OK</button></div>`;
+ window.__revealDone=done||null;if(!d.open)d.showModal();sfx('card');
+}
+function drawCard(count=1,currency='ticket',pool=null){
+ if(locked||!$('menuDialog').open||$('menuDialog').dataset.view!=='gacha'||![1,10].includes(count))return;
+ const p=state.progress,cost=currency==='gem'?count*5:count;
+ if(currency==='gem'?p.gems<cost:p.tickets<cost)return;
+ const pulls=count===10?11:count;
+ if(cardHoldings()+pulls>cardCap()){gameNotice('株券の所持枠がいっぱいです。図鑑で売却するか、所持枠を拡張してください。');return}
  sfx('gacha');
- const batch=[],candidates=poolCards(),weights=poolWeights(candidates);
- for(let i=0;i<count;i++){
-  let roll=seeded()*100;
-  const tier=weights.findIndex(weight=>(roll-=weight)<0);
-  const h=pick(candidates.filter(card=>cardRank(card)===(tier<0?weights.findLastIndex(w=>w>0):tier)));
-  const previous=state.progress.cards[h.id]||0;
-  state.progress.cards[h.id]=previous+1;batch.push({id:h.id,fresh:previous===0});log(h.name+'の株券を獲得')
+ const prevPool=drawPool;if(pool&&pool!=='event')drawPool=pool;
+ const batch=[],candidates=poolCards(),weights=poolWeights(candidates),featured=pool==='event'?seasonalFeatured():[];
+ for(let i=0;i<pulls;i++){
+  let h;
+  if(featured.length&&seeded()<.5)h=featured[Math.floor(seeded()*featured.length)];
+  else{let roll=seeded()*100;const tier=weights.findIndex(weight=>(roll-=weight)<0);h=pick(candidates.filter(card=>cardRank(card)===(tier<0?weights.findLastIndex(w=>w>0):tier)))}
+  const previous=p.cards[h.id]||0;
+  p.cards[h.id]=previous+1;batch.push({id:h.id,fresh:previous===0});log(h.name+'の株券を獲得'+(i===10?'（10連おまけ）':''))
  }
- state.progress.tickets-=count;state.progress.drawReceipt39=batch;
+ drawPool=prevPool;
+ if(currency==='gem')p.gems-=cost;else p.tickets-=cost;
+ p.drawReceipt39=batch;questCount('gacha',count);
  const end=batch.at(-1);lastDraw={horse:studs.find(h=>h.id===end.id),duplicate:!end.fresh,batch:batch.map(x=>studs.find(h=>h.id===x.id).name)};
  render();drawIntro()
 }
@@ -1500,7 +1520,7 @@ function studSeal(){
 }
 function stockBack(h,classes,style=''){
  const grade=h.source?.[7]||rarity[cardRank(h)];
- const tint=['SSR','UR'].includes(grade)?'rainbow':grade==='SR'?'gold':'blue';
+ const g=displayRarity(h),tint=['UR','UP'].includes(g)?'legend':['SSR','SSP'].includes(g)?'rainbow':g==='SR'?'gold':g==='R'?'blue':'bronze';
  return `<span aria-hidden="true" class="stockBack ${classes}" data-tint="${tint}" style="${style}">${studSeal()}<i>Thoroughbred Chronicle</i></span>`
 }
 function drawIntro(){
@@ -1551,16 +1571,56 @@ function quests(all){
   ];
 }
 function questPanel(all){
-  const labels={feed:'特別配合飼料',charm:'成長のお守り'};
-  return quests(all).map(([id,name,done,reward])=>`<div class="race"><div><b>${name}</b>
-    <small>　${Object.entries(reward).map(([key,n])=>labels[key]+' ×'+n).join(' / ')}</small></div>
-    <button ${!done||state.progress.claimed[id]?'disabled':''} onclick="claimQuest('${id}')">${state.progress.claimed[id]?'受取済み':done?'受け取る':'未達成'}</button></div>`).join('');
+ checkChallenges();
+ const tab=state.questTab||'daily',p=state.progress;
+ const tabs=[['daily','デイリー'],['weekly','ウィークリー'],['monthly','マンスリー'],['main','メイン'],['challenge','チャレンジ']];
+ if(tab==='challenge')return `<div class="quest-tabs">${tabs.map(([k,n])=>`<button aria-pressed="${k===tab}" onclick="state.questTab='${k}';refreshFeature('quest')">${n}</button>`).join('')}</div><p class="mpoint">Mポイント <b>${(p.mpoints||0).toLocaleString()}</b>　<button onclick="mExchange()">株券交換所へ</button></p><div class="challenge-list">${CHALLENGES.map(([k,n,pt])=>`<div class="challenge ${p.challenges?.[k]?'cleared':''}"><b>${p.challenges?.[k]?'CLEARED':'未達成'}</b><span>${esc(n)}</span><small>${pt} Mポイント</small></div>`).join('')}</div>`;
+ const list=questList(all).filter(q=>q.cat===tab);
+ const ready=list.filter(q=>q.cur>=q.goal&&!p.claimed[q.id]);
+ return `<div class="quest-tabs">${tabs.map(([k,n])=>`<button aria-pressed="${k===tab}" onclick="state.questTab='${k}';refreshFeature('quest')">${n}</button>`).join('')}</div>
+ <div class="quest-list">${list.map(q=>`<div class="quest ${p.claimed[q.id]?'done':''}"><div><b>${esc(q.name)}</b><div class="q-bar"><i style="width:${Math.min(100,q.cur/q.goal*100)}%"></i><span>${Math.min(q.cur,q.goal)}/${q.goal}</span></div><small>報酬：${esc(rewardText(q.reward))}</small></div><button ${q.cur<q.goal||p.claimed[q.id]?'disabled':''} onclick="claimQuest('${q.id}')">${p.claimed[q.id]?'受取済み':q.cur>=q.goal?'受け取る':'未達成'}</button></div>`).join('')}</div>
+ <button class="gold" ${ready.length?'':'disabled'} onclick="claimAll('${tab}')">まとめて受け取る（${ready.length}件）</button>`;
+}
+function periodKeys(){const d=new Date(),day=localDay(),jan=new Date(d.getFullYear(),0,1),wk=Math.floor((d-jan)/604800000);return {day,week:d.getFullYear()+'w'+wk,month:d.getFullYear()+'m'+(d.getMonth()+1)}}
+function questCount(kind,n=1){const p=state.progress,k=periodKeys();p.qc??={};for(const per of ['day','week','month']){const key=per+':'+k[per]+':'+kind;p.qc[key]=(p.qc[key]||0)+n}
+ // 古い期間のカウンタは捨てる
+ for(const key of Object.keys(p.qc)){const [per,id]=key.split(':');if(id!==k[per])delete p.qc[key]}}
+function qv(per,kind){const k=periodKeys();return state.progress.qc?.[per+':'+k[per]+':'+kind]||0}
+function rewardText(r){const L={medals:'メダル',gems:'馬封石',tickets:'ガチャチケット',fuda:'富札',feed:'特別配合飼料',charm:'成長のお守り',keys:'即完了キー',mpoints:'Mポイント'};return Object.entries(r).map(([k,n])=>(L[k]||k)+'×'+n).join('・')}
+function questList(all){
+ const k=periodKeys(),q=(cat,id,name,cur,goal,reward)=>({cat,id,name,cur,goal,reward});
+ return [
+  q('daily','d-'+k.day+'-train','調教を1回行う',qv('day','train'),1,{medals:200}),
+  q('daily','d-'+k.day+'-feed','飼葉を1回与える',qv('day','feed'),1,{fuda:1}),
+  q('daily','d-'+k.day+'-week','週送りを3回行う',qv('day','week'),3,{medals:400,keys:1}),
+  q('daily','d-'+k.day+'-race','レースに1回出走',qv('day','race'),1,{gems:1}),
+  q('weekly','w-'+k.week+'-race','レースに5回出走',qv('week','race'),5,{gems:5}),
+  q('weekly','w-'+k.week+'-win','レースで2勝',qv('week','win'),2,{tickets:2}),
+  q('weekly','w-'+k.week+'-gacha','株券ガチャを5回引く',qv('week','gacha'),5,{medals:1500}),
+  q('monthly','m-'+k.month+'-win','レースで10勝',qv('month','win'),10,{gems:20}),
+  q('monthly','m-'+k.month+'-breed','競走馬を3頭生産',qv('month','breed'),3,{tickets:5,charm:1}),
+  q('main','entry','条件戦を突破',all.some(h=>h.debutDone)?1:0,1,{feed:2}),
+  q('main','birth','自家生産を行う',all.some(h=>h.bredHere)||all.length>=2?1:0,1,{charm:1}),
+  q('main','win','現役戦の初勝利',all.some(h=>wins(h)>0)?1:0,1,{charm:1,gems:5}),
+  q('main','league','国内GI制覇',all.some(h=>h.results.some(r=>r.grade==='GI'&&r.place===1))?1:0,1,{charm:2,gems:10}),
+  q('main','retire','繁殖馬に引き継ぐ',state.retired.length?1:0,1,{feed:3}),
+  q('main','season',festivalName()+'で優勝',all.some(h=>h.results.some(r=>r.id==='season'&&r.place===1))?1:0,1,{charm:2,tickets:3})
+ ];
+}
+function quests(all){return questList(all).map(q=>[q.id,q.name,q.cur>=q.goal,q.reward])}
+function sendPresent(name,reward){const p=state.progress;p.presents??=[];p.presents.push({name,reward,at:state.clock})}
+function claimAll(cat){const p=state.progress,list=questList(allHorses()).filter(q=>q.cat===cat&&q.cur>=q.goal&&!p.claimed[q.id]);for(const q of list){p.claimed[q.id]=true;sendPresent(q.name+' 達成報酬',q.reward)}save();gameNotice(list.length+'件の報酬をプレゼントボックスに送りました。');refreshFeature('quest')}
+const CHALLENGES=[['first','初出走',10],['firstWin','初勝利',20],['favWin','1番人気で勝利',20],['upset','5番人気以下で勝利',30],['graded','重賞勝利',40],['gi','GI勝利',80],['ten','通算10勝',60],['hall','殿堂馬を出す',100],['gen3','第3世代を生産',50],['stock50','株券50種類を集める',50],['title','タイトルを獲得',100]];
+function checkChallenges(){
+ const p=state.progress,all=allHorses(),r=all.flatMap(h=>h.results);p.challenges??={};
+ const ok={first:r.length>0,firstWin:r.some(x=>x.place===1),favWin:r.some(x=>x.place===1&&x.popularity===1),upset:r.some(x=>x.place===1&&x.popularity>=5),graded:r.some(x=>x.place===1&&['GI','GII','GIII','国際GI'].includes(x.grade)),gi:r.some(x=>x.place===1&&['GI','国際GI'].includes(x.grade)),ten:r.filter(x=>x.place===1).length>=10,hall:hallHorses().length>0,gen3:all.some(h=>h.gen>=3),stock50:studs.filter(unlocked).length>=50,title:all.some(h=>h.titles?.length)};
+ for(const [k,,pt] of CHALLENGES)if(ok[k]&&!p.challenges[k]){p.challenges[k]=true;p.mpoints=(p.mpoints||0)+pt;log('チャレンジ達成：'+CHALLENGES.find(c=>c[0]===k)[1]+'（'+pt+' Mポイント）')}
 }
 function claimQuest(id){
-  const quest=quests(allHorses()).find(q=>q[0]===id);
-  if(!quest?.[2]||state.progress.claimed[id])return;
-  for(const [k,n] of Object.entries(quest[3]))state.progress.inventory[k]+=n;
-  state.progress.claimed[id]=true;
+  const q=questList(allHorses()).find(x=>x.id===id),p=state.progress;
+  if(!q||q.cur<q.goal||p.claimed[id])return;
+  p.claimed[id]=true;sendPresent(q.name+' 達成報酬',q.reward);save();
+  gameNotice('報酬として '+rewardText(q.reward)+' をプレゼントボックスに送りました。');
   refreshFeature('quest');
 }
 function extraPlots(){
@@ -1575,7 +1635,7 @@ async function managePlot(i){
 }
 function giveFruit(key){
  const c=FARM_CROPS[key];if(!c)return;const h=current(),inv=state.progress.inventory;if(!ready(h)||h.feedUsed||!inv[key])return;
- inv[key]--;h.fatigue=clamp(h.fatigue-c.fatigue);h.condition=clamp(h.condition+c.condition);h.weight=clamp(h.weight+c.weight,h.ideal-35,Math.max(h.weight,h.ideal+35));h.quality=clamp(h.quality+c.quality,0,h.cap);h.feedUsed=true;closeMenu();render()
+ inv[key]--;questCount('feed');h.fatigue=clamp(h.fatigue-c.fatigue);h.condition=clamp(h.condition+c.condition);h.weight=clamp(h.weight+c.weight,h.ideal-35,Math.max(h.weight,h.ideal+35));h.quality=clamp(h.quality+c.quality,0,h.cap);h.feedUsed=true;closeMenu();render()
 }
 function farmPanel(){return farmScreen()}
 async function tendFarm(){
@@ -1633,8 +1693,9 @@ function applyRace(replay,horses,race){
       replay.earned.push(`${h.name}：${title.name}（ボーナス賞金${bonus.toLocaleString()}枚・+${title.extra}週）`);
     }
     if(place===1){h.bonusWeek=replay.at+1;h.bonusGrade=race.grade;state.progress.tickets++;replay.earned.push(`${h.name}：株券ガチャチケット +1`)}
-    log(`${h.name}：${race.name} ${place}着`);
+    log(`${h.name}：${race.name} ${place}着`);questCount('race');if(place===1)questCount('win');
   }
+  try{checkChallenges()}catch{}
 }
 function runRace(id,simulation=false){
   const h=current();
@@ -1700,29 +1761,29 @@ const sel=titleSlotKeep??activeSlot;titleSlotKeep=null;
 showTitle(`<div class="shp-title"><div class="shp-banner"><span>★ 記念イベント開催中！ ★</span></div><div class="shp-stage" onclick="selectStableSlot()" role="button" aria-label="タップでスタート">${shpHorse('shp-horse back','shpGradB',true)}${shpHorse('shp-horse front','shpGradA',false)}<div class="shp-logo">StarHorse<br>Pocket <span class="shp-plus">+</span></div><button type="button" class="shp-news" onclick="event.stopPropagation();titleNews()"><span>公式からの<br>お知らせ</span><span class="shp-news-icon">🐴</span></button><p class="shp-touch">Touch Screen</p></div><div class="shp-under"><label class="shp-slot">厩舎スロット<select id="slotChoice" onchange="updateTitleStaff()">${[1,2,3].map(n=>`<option value="${n}" ${n===sel?'selected':''}>厩舎 ${n}</option>`).join('')}</select></label><div id="titleStaff"></div><div class="shp-menu"><button type="button" onclick="titleLegal('privacy')">プライバシーポリシー</button><button type="button" onclick="titleLegal('terms')">利用規約</button><button type="button" onclick="titleTransfer()">データ引継ぎ</button><button type="button" onclick="titleOptions()">オプション</button></div><p class="shp-pid">プレイヤーID：${playerId()}</p><div class="shp-foot"><span></span><span>v4.3.2</span></div></div></div>`);updateTitleStaff();
 }
 function operationPanel(){
- const h=current(),hall=hallHorses(),series=state.series;
- const partnerOptions=studs.filter(unlocked).map(v=>`<option value="${v.id}" ${h?.partner===v.id?'selected':''}>${esc(v.name)} · 覚醒${state.progress.awake[v.id]||0}</option>`).join('');
- const sections={shop:()=>`<h3>用品ショップ</h3>${h&&state.progress.gear?.length?`<label>馬装<select onchange="current().tack=Number(this.value);render();officeSection('shop')"><option value="0">標準</option>${state.progress.gear.map(i=>`<option value="${i}" ${h.tack===i?'selected':''}>${['','緋の頭絡','紺の頭絡','金の頭絡'][i]}</option>`).join('')}</select></label>`:''}${h?`<label>勝負服<select onchange="current().silk=Number(this.value);render();showExtra('office')">${['青磁','紫苑','朱赤','瑠璃'].map((n,i)=>`<option value="${i}" ${(h.silk||0)===i?'selected':''}>${n}</option>`).join('')}</select></label>`:''}<button onclick="buySupply('feed')">特別配合飼料 · 30枚</button><button onclick="buySupply('charm')">成長のお守り · 250枚</button>
- <details><summary>遠征ラリー</summary>${(state.progress.rallies||[]).map(esc).join(' ／ ')||'未獲得'}</details>`,training:()=>`<h3>育成委託</h3>${h?`<p>${esc(h.name)} · ${h.apt} ${h.distance}m · 残り${h.week}週</p>
- ${legendRight(h)?'<button onclick="buyInvite()">レジェンド特典・WBC出走権を購入</button>':''}<label>主戦騎手<select id="regularRider">${riders.map(([name,style],i)=>`<option value="${i}" ${h.regularRider===i?'selected':''}>${name} · ${style}</option>`).join('')}</select></label>
- <button onclick="setRegularRider()" ${ownerRank()>=4&&ready(h)&&!h.entry&&state.progress.gems>0?'':'disabled'}>契約 · シルバー4 / 馬封石1個</button>
- <label>パートナー株券<select id="partnerPick">${partnerOptions}</select></label><button onclick="assignPartner($('partnerPick').value);officeSection('training')" ${ownerRank()<3?'disabled':''}>パートナーを設定</button>
- <button onclick="partnerWorkout()" ${ownerRank()>=3&&ready(h)&&!h.trainUsed?'':'disabled'}>パートナー調教 · シルバー3</button>
- <label>遠征先<select id="expRegion"><option>国内</option><option>海外</option></select></label><label>路線<select id="expRoute">${expeditionRoutes(h).map((r,i)=>`<option value="${i}" ${r.eligible?'':'disabled'}>${r.label}</option>`).join('')}</select></label><p>${h.trip?esc(h.trip.route)+' · '+status(h):'ゲーム内週送りで遠征先から帰還します。'}</p><button onclick="dispatchHorse()" ${ready(h)&&!h.entry&&h.week>=10?'':'disabled'}>適性路線へ遠征（残り全週）</button>`:'育成馬がいません。'}`,series:()=>`<h3>殿堂馬シリーズ</h3>${series?'':`<label>路線<select aria-label="路線" onchange="state.preferredRoute=this.value;save();officeSection('series')"><option value="turf">芝王道路線</option><option value="sand" ${state.preferredRoute==='sand'?'selected':''}>ダート国際路線</option><option value="tour" ${state.preferredRoute==='tour'?'selected':''}>月替わり五番勝負</option></select></label>`}${stageMap()}<p>賞金3,000枚以上で引退した馬を最大3頭選びます。最終戦を勝つとクリア。</p>
- ${series?`<p>第${series.stage+1}戦 · ${series.ids.map(id=>esc(state.retired.find(h=>h.id===id)?.name)).join(' ／ ')}</p>
- <button onclick="hallRace()">第${series.stage+1}戦を観戦</button>`:`<div>${hall.map(h=>`<label><input name="hallPick" value="${h.id}" type="checkbox">${esc(h.name)} · ${h.earnings}枚</label>`).join('')}</div>
- <button onclick="startSeries()" ${hall.length?'':'disabled'}>編成を確定</button>`}
- <button onclick="exchangeSeries()" ${state.seriesPoints>=3?'':'disabled'}>3ポイントで成長のお守りと交換</button>`,cup:()=>`<h3>プレミアカップ</h3><p>殿堂馬は登録と同時に自動エントリーされます。決勝は極東競馬場・芝2000mの12頭立て通常レース。ゲーム内の週ごとに1回開催。</p>
- ${hall.length?`<p>自動エントリー：${esc(hall[0].name)}（獲得賞金 ${hall[0].earnings}枚）</p>
- <button onclick="premiumCup()" ${state.cupWeek!==state.clock?'':'disabled'}>決勝に出走</button>`:'<p>殿堂馬（獲得賞金3,000枚以上）がいると自動エントリーされます。</p>'}<p>${esc(state.cupReport||'')}</p>${(state.cupBracket||[]).map((m,i)=>`<p>決勝 · ${esc(m.a)} × ${esc(m.b)} → ${esc(m.w)}　${m.film?`<button onclick="replayCup(${i})">レースを観る</button>`:''}</p>`).join('')}`,extras:()=>`${seriesExtras()}${medalShop()}${series?`<h3>調教カード</h3>${[['prize','基礎賞金＋5000'],['short','短距離適性'],['long','長距離適性'],['turf','芝適性'],['sand','ダート適性']].map(([id,n])=>`<button onclick="chooseSeriesCard('${id}')" ${state.seriesPoints>=2?'':'disabled'}>${n} · 2pt</button>`).join('')}<p>シリーズ内基礎賞金 ＋${(series.mods?.prize||0)*5000}枚</p>`:''}`,pets:()=>`<h3>牧場の動物</h3><span id="petPortrait">${petIcon(state.pet)}</span><select id="petPick" onchange="document.getElementById('petPortrait').innerHTML=petIcon(this.value)">${['子ブタ','白ヤギ','柴犬','ネコ','ニワトリ'].map(n=>`<option ${n===state.pet?'selected':''}>${n}</option>`).join('')}</select>
- <label>ペットの餌<select id="petFood">${[['feed','育成飼料'],['apple','高級リンゴ'],['banana','バナナ']].map(([k,n])=>`<option value="${k}" ${state.progress.inventory[k]?'':'disabled'}>${n} · ${state.progress.inventory[k]||0}個</option>`).join('')}</select></label><button onclick="feedPet()" ${['feed','apple','banana'].some(k=>state.progress.inventory[k]>0)&&state.petWeek!==state.clock?'':'disabled'}>作物1個を与える</button>
- <p>作物を与えると、週に1回お守りを探します。</p>`};
- return `<h2>牧場事務所</h2><div class="office-layout"><nav class="office-tabs">${[['series','シリーズ編成'],['cup','プレミアカップ'],['extras','記録・交換'],['training','育成委託'],['shop','用品店'],['pets','動物']].map(([key,n])=>`<button aria-pressed="${officeTab===key}" onclick="officeSection('${key}')">${n}</button>`).join('')}</nav><div class="office-work"><p class="resource-line">シリーズ ${state.seriesPoints||0} pt　ギニー ${state.progress.guineas||0}　殿堂馬 ${hall.length}頭</p>${sections[officeTab]()}</div></div>`;
-
+ const items=[['ランキング',"go('records')",'🏆'],['お知らせ',"homeInfo('news')",'📰'],['プレゼント',"showExtra('gifts')",'🎁'],['神社',"showExtra('shrine')",'⛩'],['厩舎情報','stableInfo()','🏠'],['アイテム','inventoryPage()','🎒'],['お買い物','shopPanel()','🛒'],['フレンド','friendNote()','🤝'],['株券交換所','mExchange()','🔁'],['メダル＆馬封石ショップ','shopPanel()','💰'],['施設改装','stableInfo()','🔨'],['秘書選択','secretaryPick()','👩']];
+ return `<h2>事務所</h2><p class="resource-line">セレブランク ${celebRank()}　Mポイント ${(state.progress.mpoints||0).toLocaleString()}　殿堂馬 ${hallHorses().length}頭</p><div class="office-grid">${items.map(([n,a,i])=>`<button onclick="${a}"><span>${i}</span>${n}</button>`).join('')}</div><p class="muted">殿堂馬シリーズ・プレミアカップはホームの「殿堂馬」から、主戦騎手・遠征は競走馬メニューから行えます。</p>`;
+}
+function stableInfo(){facilityView('stableInfo','厩舎情報',`<dl class="param-tab"><dt>厩舎名</dt><dd>${esc(state.stableName||'クロニクル厩舎')}</dd><dt>厩舎Lv</dt><dd>${stableLevel()}（通算出走3回ごとに上昇）</dd><dt>馬房</dt><dd>${state.horses.length}/${stallCount()}</dd><dt>セレブランク</dt><dd>${celebRank()}</dd><dt>通算獲得賞金</dt><dd>${allHorses().reduce((n,h)=>n+(h.earnings||0),0).toLocaleString()}枚</dd></dl><h3>施設の開放</h3><p>Lv2：プール・ゲート　Lv5：森林馬道・温泉・チーズ・減量茶</p><button onclick="addBreedingStall()">馬房を増やす</button>`,'戻る')}
+function friendNote(){facilityView('friend','フレンド','<p>オフライン版のため、フレンド機能はありません。</p>','戻る')}
+function secretaryPick(){facilityView('secPick','秘書選択',`<div class="title-staff">${secretaries.map((v,i)=>`<button class="${(state.secretary||0)===i?'on':''}" onclick="state.secretary=${i};save();render();secretaryPick()"><span class="staff-image portrait${i}"></span>${v}</button>`).join('')}</div>`,'戻る')}
+const EXCHANGE=[['key','トレセン即完了キー交換券',50,3],['gem','馬封石',30,10],['ticket','ガチャチケット',20,10],['fuda','富札',15,5],['charm','成長のお守り',40,3],['orb','伝説の宝玉',150,1]];
+function mExchange(){
+ const p=state.progress,mk=periodKeys().month;if(p.exMonth!==mk){p.exMonth=mk;p.exBought={}}
+ const own={key:p.centreKeys||0,gem:p.gems,ticket:p.tickets,fuda:p.shrineTickets||0,charm:p.inventory.charm||0,orb:p.legendOrbs||0};
+ facilityView('exchange','株券交換所',`<p class="mpoint">Mポイント <b>${(p.mpoints||0).toLocaleString()}</b>　<small>在庫は毎月入荷します</small></p><div class="goods-grid">${EXCHANGE.map(([id,n,c,stock])=>{const left=stock-(p.exBought[id]||0);return `<article><b>${esc(n)}</b><p>${c} Mポイント</p><small>在庫 ${left}/${stock}　所持 ${own[id]}</small><button ${left>0&&(p.mpoints||0)>=c?'':'disabled'} onclick="exchangeM('${id}')">交換</button></article>`}).join('')}</div>${(p.guineas||0)?`<p>旧ギニー ${p.guineas}枚 <button onclick="state.progress.mpoints=(state.progress.mpoints||0)+state.progress.guineas*10;state.progress.guineas=0;save();mExchange()">Mポイントに換える（1ギニー＝10pt）</button></p>`:''}`,'戻る');
+}
+function exchangeM(id){const p=state.progress,it=EXCHANGE.find(x=>x[0]===id);if(!it)return;mExchange();if((p.exBought[id]||0)>=it[3]||(p.mpoints||0)<it[2])return;p.mpoints-=it[2];p.exBought[id]=(p.exBought[id]||0)+1;
+ if(id==='key')p.centreKeys=(p.centreKeys||0)+1;else if(id==='gem')p.gems++;else if(id==='ticket')p.tickets++;else if(id==='fuda')p.shrineTickets=(p.shrineTickets||0)+1;else if(id==='charm')p.inventory.charm++;else if(id==='orb')p.legendOrbs=(p.legendOrbs||0)+1;sfx('coin');save();mExchange()}
+const ITEM_INFO={feed:['特別配合飼料','回復と成長補助。飼葉の通常タブで使います。',30],charm:['成長のお守り','生産時に使うと素質上限+4。',250],fuda:['富札','神社の富くじを1回引けます。',200],star:['星の欠片','10個で伝説の宝玉と交換できます（神社）。',0],mariko:['馬里子像','神社の富くじの景品。厩舎に飾れます。',0],statue:['名馬の像','シリーズショップの記念品。',0],fertilizer:['肥料','農園で使います。',0]};
+function shopPanel(){
+ const h=current(),p=state.progress;
+ facilityView('shop','メダル＆馬封石ショップ',`<div class="goods-grid">${['feed','charm','fuda'].map(id=>`<article><b>${ITEM_INFO[id][0]}</b><small>${ITEM_INFO[id][1]}</small><p>メダル ${ITEM_INFO[id][2]}枚</p><button onclick="buySupply('${id}')" ${state.medals<ITEM_INFO[id][2]?'disabled':''}>購入</button></article>`).join('')}</div>
+ ${h?`<h3>馬装・勝負服</h3>${p.gear?.length?`<label>馬装<select onchange="current().tack=Number(this.value);render();shopPanel()"><option value="0">標準</option>${p.gear.map(i=>`<option value="${i}" ${h.tack===i?'selected':''}>${['','緋の頭絡','紺の頭絡','金の頭絡'][i]}</option>`).join('')}</select></label>`:'<p class="muted">頭絡はアクセサリガチャで入手できます。</p>'}<label>勝負服<select onchange="current().silk=Number(this.value);render();shopPanel()">${['青磁','紫苑','朱赤','瑠璃'].map((n,i)=>`<option value="${i}" ${(h.silk||0)===i?'selected':''}>${n}</option>`).join('')}</select></label>`:''}`,'戻る');
 }
 async function buySupply(key){
- const cost={feed:30,charm:250}[key];if(!cost||!await spend(cost,'用品購入'))return;
- state.progress.inventory[key]++;render();showExtra('office');
+ const cost={feed:30,charm:250,fuda:200}[key];if(!cost||!await spend(cost,'用品購入'))return;
+ if(key==='fuda')state.progress.shrineTickets=(state.progress.shrineTickets||0)+1;else state.progress.inventory[key]++;render();shopPanel();
 }
 function stableLevel(){return 1+Math.floor(allHorses().reduce((n,h)=>n+h.results.length,0)/3)}
 function ownerRank(){return 1+Math.min(9,Math.floor(allHorses().reduce((n,h)=>n+(h.earnings||0),0)/1200))}
@@ -1851,10 +1912,13 @@ function filterArchive(){
  $('archiveCount').textContent=matches.length+'件';
  $('archiveRows').innerHTML=matches.map(h=>`<details class="panel"><summary>${esc(h.name)} · ${esc(h.source[7])}</summary><p>${h.source.slice(1).map((v,i)=>esc(['種別','系統','特殊脚質','シリーズスキル','レジェンド特性','備考','レアリティ','出典'][i])+ '：'+esc(v||'未記載')).join('<br>')}</p></details>`).join('')||'該当する株券はありません。';
 }
-const tipKinds=['単勝','馬連','馬単','ワイド','3連複','3連単','サイド','メイクライド','複権ライド','トライ'];
+const tipKinds=['単勝','複勝','枠連','馬連','馬単','ワイド','3連複','3連単','サイド','トライ','メイクライド','複権ライド'];
+const TIP_NORMAL=['単勝','複勝','枠連','馬連','馬単','ワイド','3連複','3連単'],TIP_SPECIAL=['サイド','トライ','メイクライド','複権ライド'];
+const BET_WEEKLY=32,PAYOUT_CAP=1000000;
 function betLimit(){return 100*stableLevel()}
-function betRaces(){return currentProgram().filter(r=>!['招待','決勝'].includes(r.grade)&&!state.horses.some(h=>h.entry?.id===r.id&&h.entry.at===state.clock))}
-function betField(r,at=state.clock){return rivalField(r,at,[]).map(v=>({name:v.name,ability:v.ability,kind:v.kind}))}
+function betRaces(){return currentProgram().filter(r=>!['招待','決勝'].includes(r.grade))}
+function ownEntrants(r,at){return state.horses.filter(h=>h.entry?.id===r.id&&h.entry.at===at)}
+function betField(r,at=state.clock){const own=ownEntrants(r,at);if(own.length)return [...own.map(v=>({name:v.name,ability:morningEstimate(v),own:true})),...rivalField(r,at,own).map(v=>({name:v.name,ability:v.ability,kind:v.kind}))];return rivalField(r,at,[],12).map(v=>({name:v.name,ability:v.ability,kind:v.kind}))}
 function betProbs(field){const total=field.reduce((n,v)=>n+Math.exp(v.ability/12),0);return field.map(v=>Math.exp(v.ability/12)/total)}
 function harville(p,order){let rest=1,out=1;for(const i of order){out*=p[i]/rest;rest-=p[i]}return out}
 function probAllInTopK(p,picks,K){
@@ -1886,6 +1950,7 @@ function comboOdds(kind,p,picks){
  if(kind==='枠連'){const frames=p.map((_,i)=>Math.floor(i/2));let prob=0;for(let a=0;a<p.length;a++)for(let b=0;b<p.length;b++){if(b===a)continue;if([frames[a],frames[b]].sort((x,y)=>x-y).join('-')===picks.join('-'))prob+=harville(p,[a,b])}return cap(.85/Math.max(prob,1e-6))}
  return 1;
 }
+function legacyBetResult(r,at){const field=rivalField(r,at,[],8);const runners=field.map((v,i)=>({name:v.name,number:i+1,style:styles[i%styles.length],score:v.ability+rand(-5,5)}));simulateSections(runners,r.distance);return runners.map(v=>field.findIndex(f=>f.name===v.name))}
 function betResult(r,at){
  const p=state.progress,key=r.id+'@'+at;p.betResults??={};
  if(Array.isArray(p.betResults[key]))return p.betResults[key];
@@ -1919,10 +1984,11 @@ function settleBets(){
   const race=races.find(r=>r.id===bet.id);if(!race){continue}
   let order=null;
   const film=(state.films||[]).find(f=>f.raceId===bet.id&&f.at===bet.at);
-  if(film){const field=betField(race,bet.at);order=film.finish.map(v=>field.findIndex(f=>f.name===v.name)).filter(i=>i>=0)}
-  if(!order||order.length<3)order=betResult(race,bet.at);
+  if(film){const names=bet.field||betField(race,bet.at).map(f=>f.name);order=film.finish.map(v=>names.indexOf(v.name)).filter(i=>i>=0)}
+  if(!order||order.length<3)order=bet.field?betResult(race,bet.at):legacyBetResult(race,bet.at);
   let payout=0,hits=0;
   for(const line of bet.lines)if(betHit(bet.kind,order,line.picks)){hits++;payout+=Math.floor(line.odds*bet.unit)}
+  payout=Math.min(PAYOUT_CAP,payout);
   let jp=null;
    if(hits&&payout>=1000){jp=payout>=100000?{stage:'ULTIMATE JACKPOT',amount:666660}:payout>=10000?{stage:'EXCELLENT JACKPOT',amount:66600}:{stage:'SUPER JACKPOT',amount:2000};state.medals+=jp.amount;log(`ジャックポット！ ${jp.stage} ${jp.amount.toLocaleString()}枚`);(state.jackpots??=[]).push(jp)}
    state.medals+=payout;state.tipsMade=(state.tipsMade||0)+1;if(hits)state.tipsHit=(state.tipsHit||0)+1;
@@ -1937,13 +2003,13 @@ function buyBets(){
  const p=state.progress,race=betRaces().find(r=>r.id===$('betRace')?.value);
  if(!race||locked)return;
  const lines=markLines();if(!lines.size)return;
- const kind=$('tipKind').value,unit=Number($('betUnit').value)||1;
+ const kind=$('tipKind').value,unit=betUnitValue();if(betUsesLeft()<=0){gameNotice('今週の馬券購入回数の上限に達しました。');return}
  const field=betField(race),probs=betProbs(field),stake=lines.size*unit;
  const sameRace=(p.bets||[]).filter(b=>b.id===race.id&&b.at===state.clock).reduce((n,b)=>n+b.stake,0);
  if(sameRace+stake>betLimit()){gameNotice(`このレースのベット上限（${betLimit()}枚）を超えています。`);return}
  if(state.medals<stake){gameNotice('メダルが不足しています。');return}
  betResult(race,state.clock);
- const bet={id:race.id,at:state.clock,name:race.name,kind,mode:$('tipMode').value,unit,stake,lines:[...lines].map(key=>{const picks=key.split('-').map(Number);return {picks,odds:comboOdds(kind,probs,picks)}})};
+ p.betUses=(p.betUses||0)+1;const bet={id:race.id,at:state.clock,name:race.name,field:field.map(v=>v.name),kind,mode:$('tipMode').value,unit,stake,lines:[...lines].map(key=>{const picks=key.split('-').map(Number);return {picks,odds:comboOdds(kind,probs,picks)}})};
  state.medals-=stake;p.bets??=[];p.bets.push(bet);
  log(`馬券購入：${race.name} ${kind} ${bet.lines.length}点 ${stake}枚`);
  save();showExtra('predict');
@@ -1964,10 +2030,10 @@ function auctionLots(){
  return lots;
 }
 function auctionPanel(){
- const lots=auctionLots(),p=state.progress,full=state.horses.length>=stallCount();
- return `<h2>セリ市</h2><p>今週の上場馬（当歳）。父・母と最低価格を確認してセリに参加できます。落札するとメダルを支払い、仔馬が厩舎に加わります。上場馬は週ごとに替わります。</p>
- ${full?'<p class="notice">馬房が満室です。空きを作ると落札できます。</p>':''}
- ${lots.map(l=>`<article class="race"><div><b>父：${esc(l.sire.name)} ／ 母：${esc(l.dam.name)}</b><small style="display:block">${l.sex} · ${l.dam.apt} ${l.dam.distance}m 系統 · 最低価格 ${l.base}枚</small><small>秘書「${l.dam.apt}の${l.dam.distance>=2200?'長距離':l.dam.distance<=1600?'短距離':'中距離'}が得意そうな仔馬だわ。」</small></div>${(p.auctionSold||[]).includes(l.i)?'<span class="tag">落札済</span>':`<button onclick="joinAuction(${l.i})" ${full||state.medals<l.base?'disabled':''}>セリに参加</button>`}</article>`).join('')}`;
+ const lots=auctionLots(),p=state.progress,full=state.horses.length>=stallCount(),sec=Number(state.secretary)||0,sel=Math.min(state.auctionSel||0,lots.length-1),l=lots[sel];
+ return `<h2>セリ市</h2><p>今週の上場馬（当歳）。上場馬は週ごとに替わります。</p>${full?'<p class="notice">馬房が満室です。空きを作ると落札できます。</p>':''}
+ <div class="auction-layout"><div class="auction-list">${lots.map((x,i)=>`<button class="lot ${i===sel?'on':''}" onclick="state.auctionSel=${i};showExtra('auction')"><b>${x.sex} · 父 ${esc(x.sire.name)}</b><small>母 ${esc(x.dam.name)}　最低 ${x.base.toLocaleString()}枚</small>${(p.auctionSold||[]).includes(x.i)?'<span class="tag">落札済</span>':''}</button>`).join('')}</div>
+ <div class="auction-stage"><div class="lot-figure">${horseArt({...l.dam,color:l.dam.color||'#8a5a3c'})}</div><p><b>父：${esc(l.sire.name)} ／ 母：${esc(l.dam.name)}</b>（${l.sex}）</p><p>最低価格 ${l.base.toLocaleString()}枚</p><div class="sec-bubble"><span class="staff-image portrait${sec}"></span><p>${esc(l.dam.apt)}の${l.dam.distance>=2200?'長距離':l.dam.distance<=1600?'短距離':'中距離'}が得意そうな仔馬ですね。</p></div>${(p.auctionSold||[]).includes(l.i)?'<span class="tag">落札済</span>':`<button class="gold" onclick="joinAuction(${l.i})" ${full||state.medals<l.base?'disabled':''}>セリに参加</button>`}</div></div>`;
 }
 function joinAuction(i){
  const lot=auctionLots()[i];if(!lot||state.progress.auctionSold.includes(i)||locked)return;
@@ -1975,19 +2041,23 @@ function joinAuction(i){
  auctionView();
 }
 function auctionView(){
- const lot=auctionLots()[auctionBid.lot];
- facilityView('auctionBid','セリ市・入札',`<p><b>父：${esc(lot.sire.name)} ／ 母：${esc(lot.dam.name)}</b>（${lot.sex}）</p>
- <p>現在の価格 <b>${auctionBid.price}枚</b>${auctionBid.leader==='player'?' · あなたが最高入札者':auctionBid.leader==='npc'?' · 他の参加者が最高入札者':''}</p>
- <p class="notice">${esc(auctionBid.msg)}</p>
- <div class="row"><button class="gold" onclick="bidAuction(100)" ${state.medals<auctionBid.price+100?'disabled':''}>+100枚で入札</button><button class="gold" onclick="bidAuction(1000)" ${state.medals<auctionBid.price+1000?'disabled':''}>+1000枚で入札</button><button onclick="passAuction()">降りる</button></div>`);
+ const lot=auctionLots()[auctionBid.lot],b=auctionBid;
+ facilityView('auctionBid','セリ市・入札',`<div class="auction-bid"><div class="lot-figure">${horseArt({...lot.dam,color:lot.dam.color||'#8a5a3c'})}${b.sold?'<span class="sold-stamp">落札</span>':''}</div><div><p><b>父：${esc(lot.sire.name)} ／ 母：${esc(lot.dam.name)}</b>（${lot.sex}）</p>
+ <p class="bid-price">現在の価格 <b>${b.price.toLocaleString()}枚</b></p><p>${b.leader==='player'?'あなたが最高入札者':b.leader==='npc'?'他の参加者が最高入札者':'入札を待っています'}</p>
+ <ul class="bid-log">${(b.log||[]).slice(-6).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+ <div class="row"><button class="gold" onclick="bidAuction(100)" ${b.busy||b.sold||state.medals<b.price+100?'disabled':''}>+100枚</button><button class="gold" onclick="bidAuction(1000)" ${b.busy||b.sold||state.medals<b.price+1000?'disabled':''}>+1000枚</button><button onclick="passAuction()" ${b.busy||b.sold?'disabled':''}>降りる</button></div></div></div>`);
 }
 function bidAuction(amount){
- const b=auctionBid;if(!b)return;const lot=auctionLots()[b.lot];
- b.price+=amount;b.leader='player';
- if(b.price<lot.value&&seeded()<.8){b.price+=pick([100,100,500]);b.leader='npc';b.msg='他の参加者が '+b.price+'枚まで上げました。'}
- else if(b.price<lot.value&&seeded()<.5){b.price+=100;b.leader='npc';b.msg='他の参加者が '+b.price+'枚まで上げました。'}
- else{winAuction();return}
- auctionView();
+ const b=auctionBid;if(!b||b.busy||b.sold)return;const lot=auctionLots()[b.lot];
+ b.price+=amount;b.leader='player';b.log=[...(b.log||[]),'あなた：'+b.price.toLocaleString()+'枚'];b.busy=true;auctionView();
+ const bidders=['参加者A','参加者B','参加者C'];let rounds=0;
+ const tick=()=>{if(auctionBid!==b)return;
+  const room=lot.value-b.price,chance=room>0?Math.min(.85,.35+room/lot.value):0;
+  if(rounds<3&&seeded()<chance){rounds++;b.price+=pick([100,100,200,500]);b.leader='npc';b.log.push(bidders[(rounds+b.log.length)%3]+'：'+b.price.toLocaleString()+'枚');auctionView();setTimeout(tick,650+seeded()*500);return}
+  b.busy=false;
+  if(b.leader==='player'){b.sold=true;b.log.push('落札！');auctionView();sfx('win');setTimeout(()=>{if(auctionBid===b)winAuction()},1300)}else auctionView();
+ };
+ setTimeout(tick,700);
 }
 function passAuction(){
  const b=auctionBid;if(!b)return;
@@ -2010,41 +2080,48 @@ function tipPanel(){
  settleBets();
  const p=state.progress,list=betRaces();
  const bets=(p.bets||[]).filter(b=>b.at>=state.clock),history=p.betHistory||[];
- return `<h2>馬券</h2><p>今週開催のレース（自馬が出走するレースとWBC／SWBCを除く）に、マークシート方式でメダルを賭けられます。ベット上限は1レース ${betLimit()}枚（厩舎Lvで拡大）。レースは週送りで実施され、着順に応じてオッズ×ベットの払戻があります。特殊券種：サイド＝選んだ2頭が両方4着以内／トライ＝選んだ3頭が全て5着以内／メイクライド＝選んだ1頭が1着（高配当）／複権ライド＝選んだ1頭が3着以内。</p>
- ${list.length?`<label>対象レース<select id="betRace" onchange="renderMarks()">${list.map(r=>`<option value="${r.id}">${esc(r.name)} · ${gradeLabel(r.grade)} · ${r.apt}${r.distance}m</option>`).join('')}</select></label>
- <label>券種<select id="tipKind" onchange="renderMarks()">${tipKinds.map(n=>'<option>'+n+'</option>').join('')}</select></label>
- <label>選び方<select id="tipMode" onchange="renderMarks()"><option>流し</option><option>ボックス</option></select></label>
- <label>1点あたり<select id="betUnit" onchange="updateTipCount()">${[1,2,3,5,10,20,30].map(n=>`<option value="${n}" ${n===5?'selected':''}>${n}枚</option>`).join('')}</select></label>
- <div id="betFieldInfo"></div><div id="marks"></div><p id="tipCount" aria-live="polite"></p>
- <button class="gold" id="tipBuy" onclick="buyBets()">馬券を購入</button>
- <button id="tipWatch" onclick="watchPrediction()">レースを観戦</button>`:'<p>今週は馬券対象レースがありません（自馬出走レース・WBC／SWBCは対象外です）。</p>'}
- ${bets.length?`<h3>購入済み馬券</h3>${bets.map(b=>`<p>${esc(b.name)} · ${b.kind}（${b.mode}） ${b.lines.length}点 × ${b.unit}枚 ＝ ${b.stake}枚</p>`).join('')}`:''}
+ const k=state.tipKind||'単勝',mode=state.tipMode||'通常';
+ return `<h2>馬券</h2><div class="bet-head"><b>馬券購入あと${betUsesLeft()}回</b><span>メダル${betLimit().toLocaleString()}枚までベットできます</span></div>
+ ${list.length?`<label>対象レース<select id="betRace" onchange="renderMarks()">${list.map(r=>`<option value="${r.id}">${esc(r.name)} · ${gradeLabel(r.grade)} · ${r.apt}${r.distance}m${ownEntrants(r,state.clock).length?' · YOUR HORSE出走':''}</option>`).join('')}</select></label>
+ <div class="betting-card"><p class="card-title">BETTING CARD</p><p class="cap-note">※ 1レースの払い戻しは${PAYOUT_CAP.toLocaleString()}枚までしか払い戻されません。</p>
+ <input type="hidden" id="tipKind" value="${k}"><input type="hidden" id="tipMode" value="${mode}">
+ <div class="kind-tiles"><div>${TIP_NORMAL.map(n=>`<button class="kind-tile ${n===k?'on':''}" onclick="state.tipKind='${n}';showExtra('predict')">${n}</button>`).join('')}</div><div class="special">${TIP_SPECIAL.map(n=>`<button class="kind-tile sp ${n===k?'on':''}" onclick="state.tipKind='${n}';showExtra('predict')">${n}</button>`).join('')}</div></div>
+ <div class="mode-tiles">${['通常','ボックス','フォーメーション'].map(n=>`<button class="${n===mode?'on':''}" ${tipSize(k)===1&&n!=='通常'?'disabled':''} onclick="state.tipMode='${n}';showExtra('predict')">${n}</button>`).join('')}</div>
+ <div id="betFieldInfo"></div><div id="marks"></div>
+ <div class="unit-row"><span>1点あたり</span><label>枚数<select id="betCount" onchange="updateTipCount()">${[30,20,10,5,4,3,2,1].map(n=>`<option value="${n}" ${n===1?'selected':''}>${n}</option>`).join('')}</select></label><label>単位<select id="betScale" onchange="updateTipCount()">${[[10000,'万'],[1000,'千'],[100,'百'],[1,'枚']].map(([v,n])=>`<option value="${v}" ${v===1?'selected':''}>${n}</option>`).join('')}</select></label></div>
+ <p id="tipCount" aria-live="polite"></p>
+ <button class="gold" id="tipBuy" onclick="buyBets()">記入完了・購入</button>
+ <button id="tipWatch" onclick="watchPrediction()">レースを観戦</button></div>`:'<p>今週は馬券対象レースがありません（WBC／SWBCは対象外です）。</p>'}
+ ${bets.length?`<h3>購入馬券一覧</h3><div class="ticket-list">${bets.map(b=>`<div class="ticket"><b>${esc(b.name)}</b><span>${esc(b.kind)}（${esc(b.mode)}）</span><span>${b.lines.slice(0,6).map(l=>l.picks.map(x=>x+1).join('-')).join(' / ')}${b.lines.length>6?' …':''}</span><strong>${b.lines.length}点 × ${b.unit.toLocaleString()}枚 ＝ ${b.stake.toLocaleString()}枚</strong></div>`).join('')}</div>`:''}
  ${history.length?`<h3>精算履歴</h3>${history.map(v=>`<p>${esc(v.name)} · ${v.kind} ${v.lines}点 ${v.stake}枚 → ${v.hits?`的中${v.hits}点・払戻 ${v.payout}枚${v.jp?` ・ ${v.jp.stage} +${v.jp.amount.toLocaleString()}枚`:''}`:'不的中'}</p>`).join('')}`:''}
  <p>馬券成績：${state.tipsHit||0} / ${state.tipsMade||0} レース的中</p>`;
 }
+function betUsesLeft(){const p=state.progress;if(p.betWeek!==state.clock){p.betWeek=state.clock;p.betUses=0}return Math.max(0,BET_WEEKLY-(p.betUses||0))}
+function betUnitValue(){return (Number($('betCount')?.value)||1)*(Number($('betScale')?.value)||1)}
 function tipSize(k){return (k.startsWith('3')||k==='トライ')?3:['単勝','メイクライド','複権ライド'].includes(k)?1:2}
 function renderMarks(){
  const race=betRaces().find(r=>r.id===$('betRace')?.value);if(!race)return;
- const k=$('tipKind').value,box=$('tipMode').value==='ボックス',size=tipSize(k),frame=k==='枠連';
+ const k=$('tipKind').value,mode=$('tipMode').value,box=mode==='ボックス',single=mode==='通常',size=tipSize(k),frame=k==='枠連';
  const field=betField(race),probs=betProbs(field);
- $('betFieldInfo').innerHTML='<table class="entry-card"><thead><tr><th>馬番</th><th>馬名</th><th>単勝オッズ</th></tr></thead><tbody>'+field.map((v,i)=>`<tr><td>${frame?Math.floor(i/2)+1+'枠 ':''}${i+1}</td><td>${esc(v.name)}</td><td>${(1/probs[i]).toFixed(1)}</td></tr>`).join('')+'</tbody></table>';
- const count=frame?Math.ceil(field.length/2):field.length,names=field.map(v=>v.name);
- $('marks').innerHTML=Array.from({length:box?1:size},(_,g)=>`<fieldset><legend>${box?'組み合わせ候補':size===1?'馬番':g===0?'軸':'相手 '+g}</legend>
- ${Array.from({length:count},(_,i)=>`<label style="display:inline-flex;align-items:center;gap:4px;margin:4px"><input type="checkbox" name="mark${g}" value="${i}" onchange="updateTipCount()">${i+1}${frame?'枠':' '+esc(names[i])}</label>`).join('')}</fieldset>`).join('');
+ $('betFieldInfo').innerHTML='<table class="entry-card"><thead><tr><th>枠</th><th>馬番</th><th>馬名</th><th>単勝オッズ</th></tr></thead><tbody>'+field.map((v,i)=>`<tr class="${v.own?'home-runner':''}"><td>${Math.floor(i/2)+1}</td><td>${i+1}</td><td>${v.own?'<em class="you-tag">YOUR HORSE</em>':''}${esc(v.name)}</td><td>${(1/probs[i]).toFixed(1)}</td></tr>`).join('')+'</tbody></table>';
+ const count=frame?Math.ceil(field.length/2):field.length;
+ const legend=g=>box?'組み合わせ候補':size===1?'馬番':['1着','2着','3着'][g]||'';
+ $('marks').innerHTML=Array.from({length:box?1:size},(_,g)=>`<fieldset class="mark-row"><legend>${legend(g)}</legend>${Array.from({length:count},(_,i)=>`<label class="mark-cell"><input type="${single?'radio':'checkbox'}" name="mark${g}" value="${i}" onchange="updateTipCount()"><span>${i+1}</span></label>`).join('')}</fieldset>`).join('');
+ const w=$('tipWatch');if(w)w.disabled=ownEntrants(race,state.clock).length>0;
  updateTipCount();
 }
 function markLines(){
  const k=$('tipKind').value,size=tipSize(k),box=$('tipMode').value==='ボックス',ordered=['馬単','3連単'].includes(k);
+ if(box){const picks=[...document.querySelectorAll('[name=mark0]:checked')].map(el=>Number(el.value));const out=new Set();const rec=(start,row)=>{if(row.length===size){const rows=ordered?perm(row):[row];for(const r of rows)out.add((ordered?r:[...r].sort((a,b)=>a-b)).join('-'));return}for(let i=start;i<picks.length;i++)rec(i+1,[...row,picks[i]])};const perm=a=>a.length<2?[a]:a.flatMap((v,i)=>perm([...a.slice(0,i),...a.slice(i+1)]).map(r=>[v,...r]));rec(0,[]);return out}
  const groups=Array.from({length:size},(_,i)=>[...document.querySelectorAll('[name=mark'+(box?0:i)+']:checked')].map(el=>Number(el.value)));
  let lines=[[]];
  for(const group of groups)lines=lines.flatMap(row=>group.filter(v=>k==='枠連'||!row.includes(v)).map(v=>[...row,v]));
  return new Set(lines.map(row=>(ordered?row:row.sort((a,b)=>a-b)).join('-')));
 }
 function updateTipCount(){
- const lines=markLines(),unit=Number($('betUnit')?.value)||1,total=lines.size*unit;
- $('tipCount').textContent=lines.size?`${lines.size}通り × ${unit}枚 ＝ ${total}枚（所持 ${state.medals}枚）`:'組み合わせを選んでください';
- const buy=$('tipBuy');if(buy)buy.disabled=!lines.size||total>state.medals;
- const watch=$('tipWatch');if(watch)watch.disabled=false;
+ const lines=markLines(),unit=betUnitValue(),total=lines.size*unit;
+ $('tipCount').textContent=lines.size?`${lines.size}点 × ${unit.toLocaleString()}枚 ＝ ベット合計 ${total.toLocaleString()}枚（所持 ${state.medals.toLocaleString()}枚）`:'マークしてください';
+ const buy=$('tipBuy');if(buy)buy.disabled=!lines.size||total>state.medals||total>betLimit()||betUsesLeft()<=0;
 }
 function watchPrediction(){
  const race=betRaces().find(r=>r.id===$('betRace')?.value);if(!race)return;
@@ -2958,8 +3035,14 @@ function singleQuota(h,r){
 }
 function singleRemaining(h,r){return Math.max(0,singleQuota(h,r)-(h.soloUses?.[r.grade]||0))}
 function giftList(){
- const pending=quests(allHorses()).filter(([id,,done])=>done&&!state.progress.claimed[id]);
- return `<h2>プレゼントボックス</h2>${pending.map(([id,n])=>`<p>${esc(n)} 達成報酬 <button onclick="claimQuest('${id}');showExtra('gifts')">受け取る</button></p>`).join('')||'<p>未受取の達成報酬はありません。</p>'}`;
+ const list=state.progress.presents||[];
+ return `<h2>プレゼントボックス</h2>${list.length?`<div class="present-list">${list.map(x=>`<div class="present"><span>🎁</span><b>${esc(x.name)}</b><small>${esc(rewardText(x.reward))}</small></div>`).join('')}</div><button class="gold" onclick="receivePresents()">すべて受け取る（${list.length}件）</button>`:'<p>プレゼントはありません。</p>'}`;
+}
+function receivePresents(){
+ const p=state.progress,list=p.presents||[];if(!list.length)return;
+ for(const x of list)for(const [k,n] of Object.entries(x.reward)){
+  if(k==='medals')state.medals+=n;else if(k==='gems')p.gems+=n;else if(k==='tickets')p.tickets+=n;else if(k==='fuda')p.shrineTickets=(p.shrineTickets||0)+n;else if(k==='keys')p.centreKeys=(p.centreKeys||0)+n;else if(k==='mpoints')p.mpoints=(p.mpoints||0)+n;else p.inventory[k]=(p.inventory[k]||0)+n}
+ const n=list.length;p.presents=[];sfx('coin');save();gameNotice(n+'件のプレゼントを受け取りました。');showExtra('gifts');
 }
 function makeTone(hz,time,length,volume){
  if(!soundContext||soundContext.state!=='running'||!volume)return;
@@ -3026,7 +3109,7 @@ const stages17=[
  {name:'銀嶺準決勝',distance:2000,course:'阪神',surface:'芝',limit:2},
  {name:'冠杯決勝',distance:2400,course:'京都',surface:'芝',limit:1}
 ];
-function officeSection(key){officeTab=key;showExtra('office')}
+function officeSection(key){officeTab=key;if(key==='series'||key==='cup')return hallHub(key);if(key==='extras')return hallHub('shop');if(key==='shop')return shopPanel();if(key==='pets')return homeInfo('farm');if(key==='training'){if(current())return openMenu('detail');}showExtra('office')}
 function stageMap(){
  const active=state.series?.stage??-1;
  return '<div class="stage-map">'+seriesPath(state.series?.route||state.preferredRoute).map((r,i)=>`<div class="stage-node ${active===i?'current':active>i?'passed':''}"><small>${active===i?'出走可能':active>i?'通過':'第'+(i+1)+'戦'}</small><b>${r.name}</b><span>${r.course}・${r.surface}${r.distance}m</span><strong>${r.limit}着以内</strong></div>`).join('')+'</div>';
@@ -3200,8 +3283,9 @@ function lineupTabs(side,role){
 }
 function poolBySource(list,type){return list.filter(v=>!type||type==='全て'||(type==='自家生産'?v.retired:!v.retired))}
 function facilityBadge(key){
- if(key==='gifts')return quests(allHorses()).filter(([id,,ok])=>ok&&!state.progress.claimed[id]).length;
- if(key==='farm'){const p=state.progress;return Number(p.planted!=null&&(String(p.seedBag).startsWith('clock')?realFarmRemaining()===0:state.clock-p.planted>=(p.seedBag==='deluxe'?6:3)))+(p.plots||[]).filter(v=>v&&v.due<=state.clock).length}
+ if(key==='gifts')return (state.progress.presents||[]).length;
+ if(key==='quest')return quests(allHorses()).filter(([id,,ok])=>ok&&!state.progress.claimed[id]).length;
+ if(key==='farm'){const p=state.progress;return (p.farm||[]).filter(v=>v&&v.due<=state.clock).length+Number(p.planted!=null&&(String(p.seedBag).startsWith('clock')?realFarmRemaining()===0:state.clock-p.planted>=(p.seedBag==='deluxe'?6:3)))+(p.plots||[]).filter(v=>v&&v.due<=state.clock).length}
  return 0
 }
 function watchDebut(h){
@@ -3226,13 +3310,16 @@ function paidDraw(kind){
   else{state.medals+=1500;name='メダル1,500枚'}
  }
  p.paidDrawResult={kind:kind==='sh'?'SHガチャ':'メダルガチャ',name};
- log((kind==='sh'?'SHガチャ':'メダルガチャ')+'：'+name);save();refreshFeature('gacha');
+ log((kind==='sh'?'SHガチャ':'メダルガチャ')+'：'+name);save();
+ const cardHit=name.endsWith('の株券')||name.endsWith('（重複）');
+ if(cardHit){const h=studs.find(v=>name.startsWith(v.name+'の株券'));if(h){p.drawReceipt39=[{id:h.id,fresh:!name.includes('重複')}];lastDraw={horse:h,duplicate:name.includes('重複'),batch:[h.name]};render();drawIntro();return}}
+ itemReveal([{name,tier:/宝玉/.test(name)?'UR':'R',fresh:false}],()=>refreshFeature('gacha'));
 }
 function dailyDraw(){
  const p=state.progress,day=localDay();if(p.drawDay===day)return;p.drawDay=day;
- const reward=pick(['gem','key','food','medals','gear','orb','ticket']);
- if(reward==='gear'){p.gear??=[];const id=pick([1,2,3]);if(!p.gear.includes(id))p.gear.push(id);else p.inventory.feed++}else if(reward==='gem')p.gems++;else if(reward==='key')p.centreKeys++;else if(reward==='food')p.inventory.feed+=3;else if(reward==='orb')p.legendOrbs=(p.legendOrbs||0)+1;else if(reward==='ticket')p.tickets++;else state.medals+=300;
- p.dailyDrawResult={day,name:{gem:'馬封石1個',key:'トレセン即完了キー1個',food:'育成飼料3個',medals:'メダル300枚',gear:'馬装（重複時は育成飼料）',orb:'伝説の宝玉1個',ticket:'ガチャチケット1枚'}[reward]};log('デイリーガチャ：'+p.dailyDrawResult.name);refreshFeature('gacha')
+ const reward=pick(['gem','key','food','medals','gear','orb','ticket','fuda','fuda','medals']);
+ if(reward==='gear'){p.gear??=[];const id=pick([1,2,3]);if(!p.gear.includes(id))p.gear.push(id);else p.inventory.feed++}else if(reward==='gem')p.gems++;else if(reward==='key')p.centreKeys++;else if(reward==='food')p.inventory.feed+=3;else if(reward==='orb')p.legendOrbs=(p.legendOrbs||0)+1;else if(reward==='ticket')p.tickets++;else if(reward==='fuda')p.shrineTickets=(p.shrineTickets||0)+1;else state.medals+=600;
+ p.dailyDrawResult={day,name:{gem:'馬封石1個',key:'トレセン即完了キー1個',food:'育成飼料3個',medals:'メダル300枚',gear:'馬装（重複時は育成飼料）',orb:'伝説の宝玉1個',ticket:'ガチャチケット1枚',fuda:'富札1枚'}[reward]};if(reward==='medals')p.dailyDrawResult.name='メダル600枚';log('デイリーガチャ：'+p.dailyDrawResult.name);save();itemReveal([{name:p.dailyDrawResult.name,tier:reward==='orb'?'UR':'R'}],()=>refreshFeature('gacha'))
 }
 
 const trainers={
@@ -3291,7 +3378,8 @@ function optControls(){
  <label><input type="checkbox" ${state.voice?'checked':''} onchange="state.voice=this.checked;save()">端末内の日本語音声で実況</label>
  <label>音量<input type="range" min="0" max="100" value="${Number(state.voiceVolume??75)}" onchange="state.voiceVolume=Number(this.value);save()"></label>
  <label>牧場BGM<input type="range" min="0" max="100" value="${Number(state.music||0)}" onchange="state.music=Number(this.value);save();playAudio()"></label><label>操作音<input type="range" min="0" max="100" value="${Number(state.effects||0)}" onchange="state.effects=Number(this.value);save();playAudio()"></label><label>競走画質<select onchange="state.qualityMode=this.value;save()">${['標準','省電力'].map(k=>`<option ${state.qualityMode===k?'selected':''}>${k}</option>`).join('')}</select></label><label><input type="checkbox" ${state.skipCare?'checked':''} onchange="state.skipCare=this.checked;save()">調教・飼葉の結果演出を省略</label><label>観戦の初期表示<select onchange="state.speedMode=this.value;save()">${['通常','倍速','結果'].map(k=>`<option ${state.speedMode===k?'selected':''}>${k}</option>`).join('')}</select></label>
- <details><summary>実装仕様と資料</summary><p>年間番組は提供された旧版176行、株券資料は590行を採用しています。現役50週、殿堂条件、配合理論の優先順位、賞金区分はセガ公開資料を参照しました。素質、成長曲線、区間タイム、登場馬の能力・特性・イベント倍率は本作の計算値です。</p><p>コンテンツは端末内で進行します。日替わり支給と時計栽培は端末時計、遠征とレジェンド待機はゲーム内カレンダーを使います。馬券は有料（メダル）で購入し、レース結果に応じて払い戻されます。</p><p><a href="https://starhorse.sega.jp/shpocket/plus/breed.html" target="_blank" rel="noopener">公式の配合理論</a> ／ <a href="https://starhorse.sega.jp/shpocket/plus/update.html" target="_blank" rel="noopener">＋版の変更点</a> ／ <a href="https://starhorse.sega.jp/shpocket/plus/newelement.html" target="_blank" rel="noopener">追加コンテンツ</a></p></details><label>検証用シード<input id="gameSeed" type="number" min="1" max="4294967295" placeholder="1〜4294967295"></label><button onclick="const n=Number($('gameSeed').value);if(Number.isInteger(n)&&n>0&&n<=4294967295){state.seed=n;save();this.textContent='設定済み'}">乱数を設定</button></fieldset>`;
+ <details><summary>実装仕様と資料</summary><p>年間番組は提供された旧版176行、株券資料は590行を採用しています。現役50週、殿堂条件、配合理論の優先順位、賞金区分はセガ公開資料を参照しました。素質、成長曲線、区間タイム、登場馬の能力・特性・イベント倍率は本作の計算値です。</p><p>コンテンツは端末内で進行します。デイリーガチャ・デイリークエストは端末時計、農園・遠征・レジェンド待機はゲーム内カレンダーを使います。馬券は有料（メダル）で購入し、レース結果に応じて払い戻されます。</p><p><a href="https://starhorse.sega.jp/shpocket/plus/breed.html" target="_blank" rel="noopener">公式の配合理論</a> ／ <a href="https://starhorse.sega.jp/shpocket/plus/update.html" target="_blank" rel="noopener">＋版の変更点</a> ／ <a href="https://starhorse.sega.jp/shpocket/plus/newelement.html" target="_blank" rel="noopener">追加コンテンツ</a></p></details><label><input type="checkbox" ${state.paddock!==false?'checked':''} onchange="state.paddock=this.checked;save()">発走前にパドックを表示</label></fieldset>
+ <details class="dev-box"><summary>開発者向け</summary><label><input type="checkbox" ${state.devMode?'checked':''} onchange="state.devMode=this.checked;save();render()">開発・検証用の機能を表示（資料図鑑・試走・3D表示・素材差し替え）</label>${state.devMode?`<button onclick="assetPanel()">画像素材の差し替え</button><button onclick="homeInfo('archive')">資料図鑑</button><button onclick="homeInfo('simulation')">試走</button><label>検証用シード<input id="gameSeed" type="number" min="1" max="4294967295" placeholder="1〜4294967295"></label><button onclick="const n=Number($('gameSeed').value);if(Number.isInteger(n)&&n>0&&n<=4294967295){state.seed=n;save();this.textContent='設定済み'}">乱数を設定</button>`:''}</details>`;
 }
 function seriesSkill(v,support,race={}){
  if(!support||state.progress.awake[support.id]!==4)return 0;

@@ -637,3 +637,56 @@ dialog.birth.foaling>.birth-bubble{grid-column:2}
 .rival-line{font-size:1.4em;font-weight:900;opacity:0;animation:finaleRow .5s forwards}
 .series-slot svg,.hall-list svg,.series-slot img,.hall-list img{max-height:84px;width:auto;max-width:100%}
 .series-slot>*,.hall-list article>span{overflow:hidden;max-height:90px}
+
+/* ---- 第13弾：監査§6 ---- */
+.bet-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:#1b2a4a;color:#fff;border-radius:8px;padding:6px 12px;margin-bottom:8px}.bet-head b{color:#ffcf5a}
+.betting-card{background:linear-gradient(#ffe3ef,#ffc9de);color:#5a1033;border:3px solid #e5598f;border-radius:14px;padding:10px 12px;margin:8px 0;box-shadow:0 6px 16px #0004}
+.betting-card .card-title{margin:0;font-weight:900;letter-spacing:.3em;text-align:center;color:#c2185b}
+.cap-note{font-size:11px;margin:2px 0 8px;text-align:center}
+.kind-tiles>div{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+.kind-tile{border-radius:6px;padding:5px 10px;font-weight:800;background:#fff!important;color:#c2185b!important;border:2px solid #e5598f!important}
+.kind-tile.on{background:#e5598f!important;color:#fff!important}.kind-tile.sp{border-style:dashed!important}
+.mode-tiles{display:flex;gap:4px;margin:6px 0}.mode-tiles button.on{background:#c2185b!important;color:#fff!important}
+.mark-row{border:1px solid #e5598f;border-radius:8px;margin:4px 0;padding:4px 6px}
+.mark-cell{display:inline-flex;align-items:center;margin:2px}.mark-cell input{position:absolute;opacity:0}
+.mark-cell span{display:inline-grid;place-items:center;width:30px;height:24px;border:2px solid #e5598f;border-radius:4px;background:#fff;color:#c2185b;font-weight:800}
+.mark-cell input:checked+span{background:#333;color:#fff;border-color:#333}
+.unit-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.ticket-list{display:grid;gap:6px}.ticket{display:grid;gap:2px;background:linear-gradient(90deg,#fffbe8,#ffeeb8);color:#3a2a00;border:1px dashed #b08a2a;border-radius:6px;padding:6px 10px}
+.gacha-layout{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px}
+.gacha-tabs{display:grid;gap:4px;align-content:start}.gacha-tabs button[aria-pressed=true]{background:linear-gradient(#bc8544,#8d5326)!important;color:#fff!important}
+.gacha-wallet{font-weight:800}
+.gacha-banner{border-radius:12px;padding:12px;margin-bottom:8px;color:#fff;background:linear-gradient(120deg,#2a3f7a,#6b2a7a);border:2px solid #ffffff55}
+.gacha-banner h3{margin:0}.gacha-banner small{display:block;opacity:.9;margin-bottom:6px}
+.b-dam{background:linear-gradient(120deg,#7a2a5a,#c45a8a)}.b-event{background:linear-gradient(120deg,#7a4a0a,#d4952a)}.b-ticket{background:linear-gradient(120deg,#1f5a4a,#3a9a7a)}.b-normal,.b-daily{background:linear-gradient(120deg,#33404a,#5a6a74)}.b-acc{background:linear-gradient(120deg,#5a2a2a,#a04a3a)}
+.banner-buttons{display:flex;gap:6px;flex-wrap:wrap}.banner-buttons em{display:block;font-style:normal;font-size:11px;color:#ffe066}
+@media(max-width:640px){.gacha-layout{grid-template-columns:1fr}.gacha-tabs{grid-auto-flow:column;overflow:auto}}
+.item-reveal{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;padding:16px}
+.flip-card{width:150px;height:200px;perspective:800px}.flip-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:flipIn .9s forwards}
+.flip-back,.flip-front{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;display:grid;place-items:center;text-align:center;padding:8px}
+.flip-back{background:linear-gradient(135deg,#4a3a7a,#2a1a4a)}.flip-front{transform:rotateY(180deg);background:linear-gradient(#fff,#e8e8f0);color:#222;border:3px solid #999}
+.flip-front.t-UR{background:linear-gradient(120deg,#ffd1d1,#fff1b8,#c8ffd4,#c7e3ff,#f0c8ff);border-color:#ff6b6b}.flip-front.t-SR{background:linear-gradient(#fff5d6,#e8cf86);border-color:#d8b24a}
+.flip-front em{font-style:normal;color:#e53935;font-weight:900}
+@keyframes flipIn{0%{transform:rotateY(0)}60%{transform:rotateY(200deg)}100%{transform:rotateY(180deg)}}
+.stockBack[data-tint=bronze]{--metal:linear-gradient(115deg,#7a4a2a,#c48a5a 48%,#f0c89a 68%,#8a5a3a);--rim:#e0b088}
+.stockBack[data-tint=legend]{--metal:conic-gradient(from 30deg,#ff6b6b,#ffd56b,#7ee08a,#6bc7ff,#c38bff,#ff6b6b);--rim:#fff}
+.auction-layout,.auction-bid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:10px}
+.auction-list{display:grid;gap:4px;align-content:start}.lot{display:grid;text-align:left;gap:2px;padding:6px 8px}.lot.on{outline:3px solid #ffcf5a}.lot small{opacity:.8}
+.auction-stage{background:#ffffff10;border-radius:10px;padding:8px}.lot-figure{position:relative;max-height:180px;overflow:hidden;display:grid;place-items:center}
+.lot-figure svg{max-height:170px;width:auto}
+.sold-stamp{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%) rotate(-14deg);border:5px solid #d8342a;color:#d8342a;font-size:42px;font-weight:900;padding:2px 14px;border-radius:8px;background:#fff9;animation:finalePop .4s}
+.bid-price b{font-size:1.6em;color:#d48a00}.bid-log{list-style:none;padding:0;margin:4px 0;max-height:120px;overflow:auto;font-size:13px}
+@media(max-width:640px){.auction-layout,.auction-bid{grid-template-columns:1fr}}
+.quest-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}.quest-tabs button[aria-pressed=true]{background:linear-gradient(#bc8544,#8d5326)!important;color:#fff!important}
+.quest-list{display:grid;gap:6px;margin-bottom:8px}.quest{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;background:#ffffff10;border-radius:8px;padding:6px 10px}.quest.done{opacity:.6}
+.q-bar{position:relative;height:16px;background:#0004;border-radius:8px;overflow:hidden;margin:3px 0}.q-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#f0b43a,#ffd87a)}.q-bar span{position:relative;font-size:11px;font-weight:800;padding-left:6px}
+.challenge-list{display:grid;gap:4px}.challenge{display:grid;grid-template-columns:6em 1fr auto;gap:6px;align-items:center;background:#ffffff10;border-radius:6px;padding:4px 8px}.challenge.cleared b{color:#ffcf5a}
+.mpoint b{color:#ffcf5a;font-size:1.2em}
+.present-list{display:grid;gap:4px;margin-bottom:8px}.present{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;background:#ffffff10;border-radius:6px;padding:6px 8px}
+.office-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.office-grid button{display:grid;justify-items:center;gap:4px;padding:12px 6px;font-weight:800}.office-grid span{font-size:26px}
+.feature-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px}.feature-list>div{display:flex;gap:6px;align-items:center;background:#ffffff10;border-radius:6px;padding:4px 8px}
+.boost{margin-left:auto;background:#d8342a;color:#fff;font-weight:900;border-radius:999px;padding:0 8px;font-size:12px}
+.dev-box{margin-top:10px;opacity:.85}
+.gacha-layout>.gacha-tabs{order:0!important;grid-column:1;grid-row:1}.gacha-layout>.gacha-main{order:1!important;grid-column:2;grid-row:1}@media(max-width:640px){.gacha-layout>.gacha-tabs,.gacha-layout>.gacha-main{grid-column:1;grid-row:auto}}
+.gacha-banner h3,.gacha-banner small,.gacha-banner p{color:#fff!important;text-shadow:0 1px 2px #0008}
