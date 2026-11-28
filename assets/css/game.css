@@ -690,3 +690,26 @@ dialog.birth.foaling>.birth-bubble{grid-column:2}
 .dev-box{margin-top:10px;opacity:.85}
 .gacha-layout>.gacha-tabs{order:0!important;grid-column:1;grid-row:1}.gacha-layout>.gacha-main{order:1!important;grid-column:2;grid-row:1}@media(max-width:640px){.gacha-layout>.gacha-tabs,.gacha-layout>.gacha-main{grid-column:1;grid-row:auto}}
 .gacha-banner h3,.gacha-banner small,.gacha-banner p{color:#fff!important;text-shadow:0 1px 2px #0008}
+
+/* ---- 第13弾：監査§1 ---- */
+body>header.mini-header,body>footer{display:none!important}
+.home-icons{position:absolute;left:1.2%;top:12%;z-index:4;display:grid;gap:5px}
+.home-icons button{position:relative;display:flex;align-items:center;gap:5px;padding:4px 10px 4px 6px;border-radius:999px;font-size:clamp(10px,1.3cqw,14px);font-weight:800;background:#fffdf4e6;border:2px solid #c9a35a}
+.home-icons span{font-size:1.25em}.home-icons sup,.map-shortcuts sup{background:#e53935;color:#fff;border-radius:999px;padding:0 5px;font-size:10px}
+.celeb-badge{position:absolute;left:50%;top:1.2%;transform:translateX(-50%);z-index:4;background:linear-gradient(#3a2a5a,#1d1335);color:#fff;border:2px solid #c9a6ff;border-radius:999px;padding:2px 14px;font-size:clamp(10px,1.3cqw,14px);cursor:pointer;white-space:nowrap}
+.celeb-badge b{color:#ffe066}
+.home-invite{position:absolute;right:31%;top:30%;z-index:5}
+.invite-big{display:grid!important;justify-items:center;gap:0;padding:10px 22px!important;border-radius:14px!important;font-size:clamp(11px,1.4cqw,15px);box-shadow:0 0 0 3px #fff8,0 6px 18px #0007;animation:shpBlink 2.4s ease-in-out infinite}
+.invite-big b{font-size:2em;line-height:1}.invite-big small{font-size:.8em}
+.map-shortcuts button span{margin-right:3px}
+.catalog-home .map-adviser{width:38%!important;max-width:none!important}
+.catalog-home .map-adviser .staff-image{width:min(30cqw,300px)!important;height:min(44cqw,420px)!important;background-size:cover}
+.slot-screen{display:grid;gap:12px;justify-items:start}
+.celeb-tour .celeb-now b{font-size:1.5em;color:#7a3fd1}
+.celeb-steps{list-style:none;padding:0;display:grid;gap:4px}.celeb-steps li{background:#0000000d;border-radius:6px;padding:6px 10px;opacity:.6}.celeb-steps li.open{opacity:1;background:#c9a6ff33}
+.owner-card{display:flex;gap:12px;align-items:center;margin-bottom:8px}.owner-card .staff-image{width:72px;height:90px;border-radius:10px}.owner-title{margin:0;font-weight:800;color:#7a3fd1}.owner-card h3{margin:2px 0}
+.catalog-home .map-adviser{width:32%!important;top:20%!important}
+.catalog-home .map-adviser .staff-image{width:min(22cqw,230px)!important;height:min(30cqw,310px)!important}
+.catalog-home .pin-shrine{left:34%!important;top:24%!important}
+.slot-screen,.slot-screen label,.slot-screen legend{color:#26312a!important}
+.slot-screen #titleStaff fieldset{background:#0000000d!important;border-color:#c8873a!important}
