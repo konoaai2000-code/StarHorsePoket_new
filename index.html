@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Thoroughbred Chronicle"><meta name="theme-color" content="#101d25"><title>Thoroughbred Chronicle | Ver.4.3.2</title><link rel="stylesheet" href="assets/css/game.css">
 
-</head><body><noscript><p style="padding:20px;background:white;color:black">ゲームの起動にはJavaScriptが必要です。HTMLを保存して、スクリプトを実行できるブラウザで開いてください。</p></noscript><header class="mini-header"><div><span class="tag">個人用・オフライン</span> <span id="saveStatus" class="muted">自動保存</span></div></header><nav id="nav"></nav><main id="app"></main><footer>非公式・独立制作の競走馬育成ゲーム。育成馬と演出はオリジナル。資料図鑑・番組には提供CSVの史実名を掲載。ゲーム内の数値は独自の試算です。</footer><div id="titleOverlay" hidden></div><dialog class="ui-dialog" id="menuDialog"><div id="menuContent"></div></dialog><dialog id="raceDialog"><div class="section"><h2 id="raceTitle">レース</h2><span id="racePhase" class="tag">発走</span><select aria-label="観戦カメラ" id="cameraMode"><option value="auto">デフォルト</option><option value="side">カメラ1（テレビ中継風）</option><option value="wide">カメラ2（上空）</option><option value="own">カメラ3（自馬ターゲット）</option><option value="3d">カメラ4（立体）</option></select><label><input type="checkbox" id="runnerNames">馬名</label><button id="fastRace" type="button">2倍速</button><button id="skipRace" type="button">結果を見る</button></div><div class="broadcast-screen"><div class="broadcast-hud"><b id="hudDistance"></b><span id="hudStage"></span></div><canvas id="track" width="700" height="310"></canvas><div id="raceMeter"><i></i></div></div><p id="commentary" style="margin:12px 0;color:#d9e9dc">スタートを待っています。</p><div id="raceResult"></div><button id="closeRace" class="primary" style="margin-top:12px" disabled>厩舎へ戻る</button></dialog><style id="user-art-style"></style><script type="application/json" id="asset-pack">{}</script><script>
+</head><body><noscript><p style="padding:20px;background:white;color:black">ゲームの起動にはJavaScriptが必要です。HTMLを保存して、スクリプトを実行できるブラウザで開いてください。</p></noscript><header class="mini-header"><div><span class="tag">個人用・オフライン</span> <span id="saveStatus" class="muted">自動保存</span></div></header><nav id="nav"></nav><main id="app"></main><footer>非公式・独立制作の競走馬育成ゲーム。育成馬と演出はオリジナル。資料図鑑・番組には提供CSVの史実名を掲載。ゲーム内の数値は独自の試算です。</footer><div id="titleOverlay" hidden></div><dialog class="ui-dialog" id="menuDialog"><div id="menuContent"></div></dialog><dialog id="raceDialog"><div class="section"><h2 id="raceTitle">レース</h2><span id="racePhase" class="tag">発走</span><select aria-label="観戦カメラ" id="cameraMode"><option value="auto">デフォルト</option><option value="side">カメラ1（テレビ中継風）</option><option value="wide">カメラ2（上空）</option><option value="own">カメラ3（自馬ターゲット）</option><option value="3d">カメラ4（立体）</option></select><label><input type="checkbox" id="runnerNames">馬名</label><button id="fastRace" type="button">2倍速</button><button id="skipRace" type="button">結果を見る</button></div><div class="broadcast-screen"><div class="broadcast-hud"><b id="hudDistance"></b><span id="hudStage"></span></div><canvas id="track" width="700" height="310"></canvas><div id="raceMeter"><i></i></div></div><p id="commentary" style="margin:12px 0;color:#d9e9dc">スタートを待っています。</p><div id="raceResult"></div><button id="closeRace" class="primary" style="margin-top:12px" disabled>厩舎へ戻る</button></dialog><style id="user-art-style"></style><script src="assets/data/real_fields.js"></script><script type="application/json" id="asset-pack">{}</script><script>
 'use strict';
 const baseDocument="<!doctype html>"+document.documentElement.outerHTML;
 let state;
@@ -1258,8 +1258,9 @@ const namedFields={
  long:['ライスシャワー','メジロマックイーン','ゴールドシップ','キタサンブラック','ビワハヤヒデ','スーパークリーク','マヤノトップガン','ナリタトップロード','ヒシミラクル']
 };
 function allRivalNames(){return [...new Set([...rivalNames,...Object.values(namedFields).flat()])]}
+// 史実の競走年度：1984〜2024年を巡回（実在馬データの収録範囲）
 function historyYear(year){
- return 1993+((year-1993)%34+34)%34
+ return 1984+((year-1984)%41+41)%41
 }
 function seasonAt(at){return historyYear((Number.isInteger(state.racingEpoch)?state.racingEpoch:state.yearStart)+Math.floor(at/52))}
 function historicRaceKey(r){
@@ -1268,14 +1269,16 @@ function historicRaceKey(r){
 }
 function rivalField(r,at,horses,size=null){
  const count=Math.max(0,(size||(['招待','決勝'].includes(r.grade)?12:8))-horses.length),field=[],used=new Set(horses.map(h=>h.name));
- function add(name,kind,bonus=0,alumnus=null){
+ function add(name,kind,bonus=0,alumnus=null,coat=''){
   if(field.length>=count||used.has(name))return;
-  used.add(name);field.push({name,kind,alumnus,ability:alumnus?(r.level+alumnus.quality)/2:r.level+bonus})
+  used.add(name);field.push({name,kind,alumnus,coat,ability:alumnus?(r.level+alumnus.quality)/2:r.level+bonus})
  }
  const special=['招待','決勝'].includes(r.grade);
  if(special)for(const h of hallHorses().slice(0,3))add(h.name,'殿堂',0,h);
  const key=historicRaceKey(r),year=seasonAt(at);
  if(!['条件戦','新馬'].includes(r.grade)){
+  // 実在馬データ（強さ順）を優先し、残りを既存の史実馬・架空馬で埋める
+  for(const [name,coat,strength] of (window.REAL_FIELDS?.[key]?.[year]||[]))add(name,'実名',Math.max(-4,Math.min(10,(Number(strength)-86)*.8)),null,coat);
   const names=historyFields[key]?.[year]||[];
   names.forEach((name,i)=>add(name,'史実',i===0?6:Math.max(-3,4-i*.8)))
  }
@@ -1288,17 +1291,20 @@ function rivalField(r,at,horses,size=null){
  }
  return field
 }
+function coatLook(look,coat){if(!coat)return look;const v={'栗毛':25,'栃栗毛':40,'鹿毛':76,'黒鹿毛':118,'青鹿毛':132,'青毛':148,'芦毛':178,'白毛':232}[coat];if(v==null)return look;const out=look.slice();out[0]=v;return out}
 function seasonArchive(year=seasonAt(state.clock)){
- const rows=Object.entries(historyFields).filter(([,ys])=>ys[year]?.length);
- facilityView('seasonArchive','年代別の史実ライバル',`<label>競走年度<select onchange="seasonArchive(Number(this.value))">${Array.from({length:34},(_,i)=>1993+i).map(y=>`<option ${y===year?'selected':''}>${y}</option>`).join('')}</select></label><p>JRA成績に基づく収録馬。出走枠の残りには架空馬が入ります。</p>${rows.map(([name,ys])=>`<details><summary>${esc(name)}　${esc(ys[year][0])}</summary><p>${ys[year].map(esc).join(' ／ ')}</p></details>`).join('')}`)
+ const merged={};for(const [k,ys] of Object.entries(window.REAL_FIELDS||{}))if(ys[year]?.length)merged[k]=ys[year].map(e=>e[0]);
+ for(const [k,ys] of Object.entries(historyFields))if(ys[year]?.length)merged[k]=[...new Set([...(merged[k]||[]),...ys[year]])];
+ const rows=Object.entries(merged).map(([k,v])=>[k,{[year]:v}]);
+ facilityView('seasonArchive','年代別の史実ライバル',`<label>競走年度<select onchange="seasonArchive(Number(this.value))">${Array.from({length:41},(_,i)=>1984+i).map(y=>`<option ${y===year?'selected':''}>${y}</option>`).join('')}</select></label><p>実在馬データ（1984〜2024年・GI中心）とJRA成績に基づく収録馬。出走枠の残りには架空馬が入ります。</p>${rows.map(([name,ys])=>`<details><summary>${esc(name)}　${esc(ys[year][0])}</summary><p>${ys[year].map(esc).join(' ／ ')}</p></details>`).join('')}`)
 }
 function openingSeasonControl(){
  if(state.clock!==0||state.horses.some(h=>h.entry||h.conditionResults?.length||h.rotation?.length))return '';
  const year=seasonAt(0);
- return `<label>開始する競走年度<select aria-label="開始する競走年度" onchange="changeOpeningSeason(Number(this.value))">${Array.from({length:34},(_,i)=>1993+i).map(y=>`<option ${year===y?'selected':''}>${y}</option>`).join('')}</select></label>`
+ return `<label>開始する競走年度<select aria-label="開始する競走年度" onchange="changeOpeningSeason(Number(this.value))">${Array.from({length:41},(_,i)=>1984+i).map(y=>`<option ${year===y?'selected':''}>${y}</option>`).join('')}</select></label>`
 }
 function changeOpeningSeason(year){
- if(!Number.isInteger(year)||year<1993||year>2026||!openingSeasonControl())return;
+ if(!Number.isInteger(year)||year<1984||year>2024||!openingSeasonControl())return;
  state.racingEpoch=year;render()
 }
 function practiceField(){
@@ -1667,8 +1673,8 @@ function simulateRace(race,horses,at){
       Math.max(0,Math.abs(h.weight-h.ideal)-6)*.2+(h.quality-60)*.43+rand(-8,8);
     return {look:horseLook(h).slice(),tack:h.tack||0,raceForm:{weight:h.weight,offset:h.weight-h.ideal,fit:!distanceGap(h,race.distance),gap:distanceGap(h,race.distance),interval:last?at-last.at:null},estimate:morningEstimate(h),id:h.id,name:h.name,color:['#edc77a','#684c8a','#af493e','#4166be'][h.silk||0]||runnerColors[i],reading:h.reading||h.name,specialStyle:h.specialStyle||'',style:h.tactics?.style||h.style,score:score+(riders[h.tactics?.rider]?.[1]===h.tactics?.style&&h.tactics?2:0)+(h.tactics&&riderSurface(h.tactics.rider)===race.apt?1:0),own:true};
   });
-  const solo=horses.length===1&&horses[0].tactics?.solo&&['招待','決勝'].includes(race.grade);const opponents=rivalField(race,at,horses).map(({name,alumnus,ability:estimate,kind},i)=>{
-   return {look:horseLook(alumnus||{name}),name,kind,estimate,color:runnerColors[i%runnerColors.length],style:alumnus?.style||pick(styles),score:estimate+rand(-9,10),own:false}
+  const solo=horses.length===1&&horses[0].tactics?.solo&&['招待','決勝'].includes(race.grade);const opponents=rivalField(race,at,horses).map(({name,alumnus,ability:estimate,kind,coat},i)=>{
+   return {look:coatLook(horseLook(alumnus||{name}),coat),name,kind,estimate,color:runnerColors[i%runnerColors.length],style:alumnus?.style||pick(styles),score:estimate+rand(-9,10),own:false}
   });
   return {name:race.name,course:race.course||'',grade:race.grade,apt:race.apt,distance:race.distance,at,
     finish:simulateSections(racePace([...field,...opponents.map(v=>solo?{...v,score:v.score-6}:v)]),race.distance),earned:[]};

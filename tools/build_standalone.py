@@ -17,6 +17,9 @@ def repl(m):
 css = (src.parent / 'assets/css/game.css').read_text(encoding='utf-8')
 css = css.replace('../img/', 'assets/img/')
 html = html.replace('<link rel="stylesheet" href="assets/css/game.css">', '<style>' + css + '</style>')
+for js in sorted((src.parent / 'assets' / 'data').glob('*.js')):
+    rel = 'assets/data/' + js.name
+    html = html.replace(f'<script src="{rel}"></script>', '<script>' + js.read_text(encoding='utf-8') + '</script>')
 html = re.sub(r'assets/img/([0-9a-f]{12})\.(webp|jpg|png)', repl, html)
 if not no_audio:
     audio_root = src.parent / 'assets' / 'audio'
