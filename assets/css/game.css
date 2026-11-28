@@ -531,3 +531,30 @@ dialog{max-height:calc(100dvh - 8px)}
 .final-panels .lock{opacity:.75;margin:0}
 .enter-stable{display:block;width:100%;margin-top:10px;padding:12px;font-size:1.15em;font-weight:900;color:#fff!important;background:linear-gradient(#6fd17f,#2f8f45)!important;border:2px solid #d8ffd9!important;border-radius:999px!important}
 @media(max-width:640px){.final-result{grid-template-columns:1fr}.final-panels{grid-template-columns:1fr}}
+
+/* ---- 第13弾：監査§3 ---- */
+.care-links{display:flex;gap:4px;margin-top:8px}.care-links button{flex:1;padding:4px 2px;font-size:12px}
+.care-sec{margin:0 0 6px}.care-sec p{font-size:13px}
+.care-chip i{display:inline-block;font-style:normal;background:#ffffffd9;color:#2b3a2e;border-radius:4px;padding:0 5px;margin:0 2px 2px 0;font-size:11px}
+.care-proof{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:10px;align-items:start}
+.feed-spec{border:2px solid #d8342a;border-radius:8px;padding:6px 8px;margin-bottom:6px;background:#fff8f2;color:#3a2a20}
+.feed-spec span i{display:inline-block;font-style:normal;background:#d8342a;color:#fff;border-radius:4px;padding:0 6px;margin-right:4px;font-size:11px}
+.feed-spec b{display:block;margin-top:3px}.feed-spec small{opacity:.8}
+.care-tile{position:relative}.tile-count{position:absolute;right:3px;bottom:2px;font-style:normal;font-size:11px;font-weight:800;background:#000a;color:#fff;border-radius:4px;padding:0 4px}
+.secret-tile{box-shadow:0 0 0 2px #d8342a inset}.crop-icon{font-size:28px;line-height:1.2}
+.centre-why{display:block;font-size:11px;color:#c0392b;font-weight:700}
+.farm-screen{display:grid;gap:12px}
+.farm-plots{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.farm-plot{position:relative;background:linear-gradient(#7a5a32,#5b4024);color:#fff;border:2px solid #3e2a14;border-radius:10px;padding:10px;min-height:120px}
+.farm-plot.ripe{box-shadow:0 0 0 3px #ffd34d}.farm-plot.legacy{opacity:.85}
+.ripe-badge{position:absolute;top:6px;right:6px;background:#e9432f;color:#fff;font-weight:800;font-size:12px;border-radius:999px;padding:1px 8px}
+.plot-timer{font-weight:800;color:#ffe9a8}.seed-buttons{display:grid;gap:4px}.seed-buttons small{display:block;font-size:11px;opacity:.85}
+.crop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px}
+.crop-cell{display:grid;justify-items:center;background:#ffffff18;border:1px solid #ffffff33;border-radius:8px;padding:5px 2px}
+.crop-cell span{font-size:24px}.crop-cell small{font-size:11px}.crop-cell b{font-size:12px}.crop-cell.none{opacity:.45}
+.juice-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.juice-row small{display:block;font-size:11px;opacity:.8}
+.farm-pet{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.shrine-screen{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.shrine-screen section{background:#ffffff12;border:1px solid #ffffff2e;border-radius:10px;padding:10px}
+.prize-list{list-style:none;padding:0;margin:4px 0 8px;display:grid;gap:2px}.prize-list li{display:flex;justify-content:space-between}
+.fortune{font-size:2em;font-weight:900;color:#d8342a;margin:4px 0}

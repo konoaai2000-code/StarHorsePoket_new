@@ -772,7 +772,7 @@ function eligible(h,r,at=nextDate(r),paid=false){
 if(!h.debutDone)return '条件戦を突破してください';if(h.location!=='stable')return '入厩が必要';if(h.week<=0)return '引退時期';if(!paid&&h.fatigue>75)return '疲労が高い';if(at-state.clock>=h.week)return '開催前に現役期間終了';if(r.event&&state.clock>at)return '開催終了';if(r.id==='debut')return '条件戦で実施';if(['classic1','classic2','classic3','oaks'].includes(r.id)&&state.yearStart+Math.floor(at/52)>h.bornYear)return '3歳限定';if(r.id==='oaks'&&h.sex!=='牝')return '牝馬限定';if(r.grade==='決勝'&&!invitationBalance(h).swbc)return 'WBC優勝が必要';if(r.grade==='招待'&&!invitationBalance(h).wbc)return 'GI優勝が必要';if(r.event&&!h.results.some(v=>v.place===1))return '現役戦1勝が必要';if(r.world&&!h.results.some(v=>v.place===1&&['GI','国際GI'].includes(v.grade)))return 'GI優勝が必要';if(wins(h)<r.req)return `${r.req}勝以上必要`;return ''}
 function growthFactor(h){const age=h.spent;return h.growth==='早熟'?Math.max(.52,1.24-age*.015):h.growth==='晩成'?Math.min(1.45,.72+age*.015):1.05;}
 async function center(k){let h=current(),n=k==='long'?25:1;if(!ready(h)||h.entry||h.trainUsed||h.feedUsed||h.week<n)return;if(!centreAllowed(h,k))return;
- const price=trainers[k]?(trainers[k][1]===10?5:2):['start','power','burst'].includes(k)?2:0;
+ const price=trainers[k]?(trainers[k][1]===10?5:2):['start','power','burst','speed','stamina'].includes(k)?2:0;
  if(price){if(state.progress.gems<price||!await askOwner('馬封石'+price+'個で委託しますか？'))return;state.progress.gems-=price}else if(!await spend(n===25?5000:1000,'トレセン'))return;
  if(trainers[k]?.[1]===10)h.eliteCount=(h.eliteCount||0)+1;h.location='center';h.centerJob={kind:k,left:n};log(`${h.name}：トレセン ${n}週の委託を開始`);render();}
 
@@ -801,40 +801,45 @@ const carePictures={"t0": "assets/img/ec74f5fab25b.webp", "t1": "assets/img/4755
 function careOptions(h,kind,tab){
  const item=(id,name,art,icon,effect,weight,cost,lock='')=>({id,name,art,icon,effect,weight,cost,lock});
  if(kind==='train'){
-  const courses=[0,1,6,8,2,3,4,5,7].map(i=>item(i,['芝','ダート','坂路','プール','ゲート','休養','ウッドチップ','併せ馬','ポリトラック'][i],['turf','dirt','track_dirt_day','pool','gate','spa','wood','turf','dirt'][i],['🌱','🏇','⛰️','🌊','🚧','🌳','🪵','🏇'][i],workouts[i][1],trainingWeight(i,1),4,[3,4].includes(i)&&stableLevel()<2?'厩舎Lv2で開放':''));
-  courses.push(item('wood','森林馬道','wood','🌲','気性改善・体重増加',4,4,stableLevel()<5?'厩舎Lv5で開放':''),item('spa','温泉','spa','♨️','疲労回復・調子改善',0,4,stableLevel()<5?'厩舎Lv5で開放':''));
-  if(((state.clock*31+[...h.id].reduce((a,c)=>a+c.charCodeAt(0),0))%5)===0)courses.push(item('secret','極秘調教','gate','⚡','脚質変更・対応能力上昇',-8,20));
+  const courses=[0,1,6,8,2,3,4].map(i=>item(i,['芝','ダート','坂路','プール','ゲート','休養','ウッドチップ','併せ馬','ポリトラック'][i],['turf','dirt','track_dirt_day','pool','gate','spa','wood','turf','dirt'][i],['🌱','🏇','⛰️','🌊','🚧','🌳','🪵','🏇'][i],workouts[i][1],trainingWeight(i,1),4,[3,4].includes(i)&&stableLevel()<2?'厩舎Lv2で開放':''));
+  const lv5=stableLevel()>=5||luckyOwner();
+  courses.push(item('wood','森林馬道','wood','🌲','気性改善・体重増加',4,4,lv5?'':'厩舎Lv5で開放'),item('spa','温泉','spa','♨️','疲労回復・調子改善',0,4,lv5?'':'厩舎Lv5で開放'));
+  if(secretAvailable(h))courses.push(item('secret','極秘調教','gate','⚡','脚質変更・対応能力上昇',-8,20));
   const p=studs.find(p=>p.id===h.partner);
-  if(p&&ownerRank()>=3&&((state.clock*17+[...h.id].reduce((a,c)=>a+c.charCodeAt(0),0))%4)===0)courses.push(item('partner','パートナー','turf','🏇',p.name+'との併走',-6,workoutFee(p,state.progress.awake[p.id]||0)));
+  if(p&&ownerRank()>=3)courses.push({...item('partner','パートナー','turf','🤝',p.name+'との併走',-6,partnerFee(p,1)),card:p});
   return courses;
  }
- const feedItem=i=>item(i,feeds[i][0],['hay','carrot','hay','seeds','radish','cheese','tea'][i],['🌾','🥕','🪣','🌿','🥬','🧀','🍵'][i],feeds[i][1],feeds[i][3],i===3?0:2,i>=5&&stableLevel()<5?'厩舎Lv5で開放':i===3&&!state.progress.inventory.feed?'在庫なし':'');
- if(tab==='農園')return [feedItem(3),...['apple','banana'].map((id,i)=>item(id,['高級リンゴ','バナナ'][i],id,['🍎','🍌'][i],'疲労回復・調子上昇',2,0,state.progress.inventory[id]?'':'在庫なし'))];
+ const feedItem=i=>item(i,i===3?'特別配合飼料':feeds[i][0],['hay','carrot','hay','seeds','radish','cheese','tea'][i],['🌾','🥕','🪣','🌿','🥬','🧀','🍵'][i],feeds[i][1],feeds[i][3],i===3?0:2,i>=5&&stableLevel()<5?'厩舎Lv5で開放':i===3&&!state.progress.inventory.feed?'在庫なし':'');
+ if(tab==='農園')return Object.entries(FARM_CROPS).map(([id,c])=>item(id,c.name,null,c.icon,c.effect,c.weight,0,state.progress.inventory[id]?'':'在庫なし'));
  if(tab==='プレゼント')return bonusFeed(h)?[item('feast','勝利のごちそう','hay','🎁','勝利翌週限定・疲労回復',0,0)]:[];
- return [0,1,4,5,6,2].map(feedItem);
+ return [0,1,4,5,6,3].map(feedItem);
 }
 function careRoom(kind,tab='通常',selected=0){
  const h=current();if(!h)return;
  const trainMode=kind==='train', options=careOptions(h,kind,tab),v=options[selected],title=trainMode?'調教':'飼葉';
  const blocked=!ready(h)?'入厩中の競走馬が対象です':(trainMode?h.trainUsed:h.feedUsed)?'今週は実施済みです':v?.lock||'';
  const entry=h.entry&&races.find(r=>r.id===h.entry.id);
- const left=`<aside class="care-file"><div class="care-id">${horseFigure(h,'head')}<b>${esc(h.name)}</b></div><div class="care-next"><strong>次走予定</strong><b>${entry?esc(entry.name):'未登録'}</b></div><div class="care-vitals"><b>${esc(h.sex)}　${horseAge(h)}歳</b><strong>${h.weight} kg</strong><span>脚質　${esc(h.style)}</span><span>残り ${h.week}週</span><span>獲得賞金</span><span>${h.earnings} 枚</span></div><div class="care-apt"><span>距離適性</span><b>${horseRange(h).join('〜')}m</b><span>コース</span><b>${esc(h.apt)}</b><span>適正体重</span><b>${h.ideal} kg</b></div><details><summary>秘書の助言</summary><p>${secretaryTip(h)}</p></details>${trainMode?'<details><summary>自動調教</summary>'+autoTrainingPanel(h)+'</details>':''}</aside>`;
+ const left=`<aside class="care-file"><div class="care-id">${horseFigure(h,'head')}<b>${esc(h.name)}</b></div><div class="care-next"><strong>次走予定</strong><b>${entry?esc(entry.name):'未登録'}</b></div><div class="care-vitals"><b>${esc(h.sex)}　${horseAge(h)}歳</b><strong>${h.weight} kg</strong><span>脚質　${esc(h.style)}</span><span>残り ${h.week}週</span><span>獲得賞金</span><span>${h.earnings} 枚</span></div><div class="care-apt"><span>距離適性</span><b>${horseRange(h).join('〜')}m</b><span>コース</span><b>${esc(h.apt)}</b><span>適正体重</span><b>${h.ideal} kg</b></div><div class="care-links"><button onclick="openMenu('history')">戦績</button><button onclick="openMenu('pedigree')">血統表</button><button onclick="openMenu('detail')">詳細</button></div></aside>`;
  const pick=(idx,t=tab)=>`careRoom('${kind}','${t}',${idx})`;
- const icon=x=>assetIcon(x.art)||`<img class="asset-icon" src="${carePictures[(trainMode?'t':'f')+x.id]}" alt="">`;
+ const icon=x=>assetIcon(x.art)||(carePictures[(trainMode?'t':'f')+x.id]?`<img class="asset-icon" src="${carePictures[(trainMode?'t':'f')+x.id]}" alt="">`:`<span class="crop-icon">${x.icon||'🍎'}</span>`);
  const signed=n=>(n>0?'+':'')+n+' kg';
- const command=s=>typeof v.id==='number'?(trainMode?`chooseTraining(${v.id},${s})`:`menuAction('feed',${v.id})`):v.id==='partner'?'partnerWorkout(true)':['apple','banana'].includes(v.id)?`careFruit('${v.id}')`:`extraCare('${v.id}')`;
- const multi=trainMode&&[0,1,2,6,8].includes(v?.id);
- const actions=v?(multi?[0,1,2]:[1]).map(s=>`<button class="care-order" onclick="${command(s)}" ${blocked?'disabled':''}>${multi?'<em class="care-chip level'+s+'">'+esc(s===0?v.effect.split('・')[0]+'・調子回復':v.effect)+'</em>':''}<span>${multi?['馬なり','強め','一杯'][s]:trainMode?'調教する':'与える'}</span><b>${signed(multi?trainingWeight(v.id,s):v.weight)}</b><small>${v.cost?'◉ × '+v.cost:v.id==='feast'?'勝利特典':'所持 '+(state.progress.inventory[v.id===3?'feed':v.id]||0)+'個'}</small></button>`).join(''):'';
- const recommended=trainMode?(h.fatigue>40?5:0):1;
+ const command=s=>typeof v.id==='number'?(trainMode?`chooseTraining(${v.id},${s})`:`menuAction('feed',${v.id})`):v.id==='partner'?`partnerWorkout(true,${s+1})`:v.id==='secret'?`extraCare('secret',${s})`:FARM_CROPS[v.id]?`careFruit('${v.id}')`:`extraCare('${v.id}')`;
+ const multi=trainMode&&[0,1,2,3,4,6,8].includes(v?.id);
+ const tags=t=>String(t).split(/[・/]/).map(x=>x.trim()).filter(Boolean).slice(0,2).map(x=>`<i>${esc(x)}</i>`).join('');
+ let actions='';
+ if(v&&v.id==='secret')actions=SECRET_CHOICES.map(([st,key],i)=>`<button class="care-order" onclick="${command(i)}" ${blocked?'disabled':''}><em class="care-chip">${tags(st+'・'+statNames[key])}</em><span>${esc(st)}</span><b>${signed(-8)}</b><small>◉ × 20</small></button>`).join('');
+ else if(v&&v.id==='partner')actions=[1,2,3].map(n=>`<button class="care-order" onclick="${command(n-1)}" ${blocked?'disabled':''}><em class="care-chip">${tags(Object.keys(partnerEffects(v.card,state.progress.awake[v.card.id]||0)).map(k=>statNames[k]).join('・'))}</em><span>P調教${n}</span><b>${signed(-6)}</b><small>◉ × ${partnerFee(v.card,n)}</small></button>`).join('');
+ else if(v)actions=(multi?[0,1,2]:[1]).map(s=>`<button class="care-order" onclick="${command(s)}" ${blocked?'disabled':''}>${multi?'<em class="care-chip level'+s+'">'+tags(s===0?v.effect.split('・')[0]+'・調子回復':v.effect)+'</em>':''}<span>${multi?['馬なり','強め','一杯'][s]:trainMode?'調教する':'与える'}</span><b>${signed(multi?trainingWeight(v.id,s):v.weight)}</b><small>${v.cost?'◉ × '+v.cost:v.id==='feast'?'勝利特典':'所持 '+(state.progress.inventory[v.id===3?'feed':v.id]||0)+'個'}</small></button>`).join('');
+ const recommended=trainMode?recommendedCourse(h):1;
  const tabs=trainMode?'':`<div class="care-tabs">${['通常','農園','プレゼント'].map(t=>`<button aria-pressed="${t===tab}" onclick="${pick(0,t)}">${t}</button>`).join('')}</div>`;
- const board=`<div class="care-board">${v?`<h3>${trainMode?'':tab+'飼葉　'}${esc(v.name)}</h3><div class="care-proof"><div class="care-picture">${icon(v)}</div><div class="care-choices"><p>${esc(v.effect)}</p>${actions}</div></div><p class="care-note" role="status">${esc(blocked)}</p>`:'<p class="care-empty">勝利の翌週に特別な飼葉が届きます。</p>'}${tabs}<div class="care-tray">${options.map((x,i)=>`<button class="care-tile" aria-pressed="${i===selected}" onclick="${pick(i)}">${icon(x)}<small>${esc(x.name)}</small></button>`).join('')}${(trainMode||tab==='通常')?`<button class="care-tile" onclick="${pick(options.findIndex(x=>x.id===recommended))}"><span>🔰</span><small>おすすめ</small></button>`:''}</div></div>`;
+ const board=`<div class="care-board"><div class="sec-bubble care-sec"><span class="staff-image portrait${Number(state.secretary)||0}"></span><p>${esc(secretaryTip(h,trainMode?v:null))}</p></div>${v?`<h3>${trainMode?'':tab+'飼葉：'}${esc(v.name)}</h3><div class="care-proof"><div class="care-picture">${icon(v)}</div><div class="care-choices">${trainMode?`<p>${esc(v.effect)}</p>`:`<div class="feed-spec"><span>${tags(v.effect)}</span><b>${esc(v.name)} ${signed(v.weight)}</b><small>${v.cost?'メダル×'+v.cost:FARM_CROPS[v.id]||v.id===3?'所持 '+(state.progress.inventory[v.id===3?'feed':v.id]||0)+'個':''}</small></div>`}${actions}</div></div><p class="care-note" role="status">${esc(blocked)}</p>`:'<p class="care-empty">勝利の翌週に特別な飼葉が届きます。</p>'}${tabs}<div class="care-tray">${options.map((x,i)=>`<button class="care-tile${x.id==='secret'?' secret-tile':''}" aria-pressed="${i===selected}" onclick="${pick(i)}">${icon(x)}<small>${esc(x.name)}</small>${!trainMode&&(FARM_CROPS[x.id]||x.id===3)?`<em class="tile-count">×${state.progress.inventory[x.id===3?'feed':x.id]||0}</em>`:''}</button>`).join('')}${(trainMode||tab==='通常')?`<button class="care-tile" onclick="${pick(options.findIndex(x=>x.id===recommended))}"><span>🔰</span><small>おすすめ</small></button>`:''}</div></div>`;
  facilityView('care32',title,`<div class="care-console">${left}${board}</div>`,'戻る');
 }
 function careFruit(id){
  const h=current(),before=workoutSnapshot(h);giveFruit(id);if(h.feedUsed&&!state.skipCare)careReceipt(h,before,'農園飼葉')
 }
 
-function openMenu(k){if(k==="train"||k==="feed")return careRoom(k);let h=current();if(!h)return;let label='',body='';const syms=['🌿','🟫','⛰','🏊','🚧','🌳','🪵','🏇'];if(k==='condition'){label='デビュー・条件戦';body=`<p class="notice">条件戦を3戦すると入厩します。条件戦では現役50週を消費しません。</p><h3>${esc(h.name)}　${h.conditionResults.length}/3戦 · ${h.conditionWins}勝</h3>${debutHistory(h)}${h.debutDone?`<p class="notice">入厩決定！ スタッフ：${rank(h)}</p>${h.spent===0&&!h.entry&&!h.ageSelected?`<label>入厩区分<select id="startAge"><option value="3">3歳（クラシック路線）</option><option value="4">古馬</option></select></label>`:''}<button class="gold" onclick="if(document.getElementById('startAge')){current().bornYear=state.yearStart+Math.floor(state.clock/52)-(Number(document.getElementById('startAge').value)-3);current().ageSelected=true;render()}closeMenu()">育成へ</button>`:`<button class="gold" onclick="closeMenu();conditionRound(current())">結果だけ見る（スキップ）</button>`}`}else if(k==='race'){label='出走登録';body=h.entry?`<p class="notice">${esc(races.find(r=>r.id===h.entry.id).name)} / ${dateLabel(h.entry.at)}</p><button class="gold" onclick="raceWeek()">${raceAction(h)}</button><button onclick="closeMenu()">今週の育成に戻る</button><button onclick="closeMenu();cancelEntry()">登録を取り消す</button>`:`<p class="notice">レースを登録後、開催週に週送りするとレースが始まります。調教・飼葉は登録後も可能です。</p>`+calendarRaces.filter(r=>programmeDate(r)!==null).sort((a,b)=>programmeDate(a)-programmeDate(b)).map(r=>{let reason=eligible(h,r,programmeDate(r));return `<div class="race program-race" data-program="${r.id}"><div><span class="grade">${gradeLabel(r.grade)}</span>　<b>${esc(r.name)}</b><small style="display:block">${dateLabel(programmeDate(r))}　${r.apt} ${r.distance}m　${r.course||''}　${titles.some((t,i)=>h.favourites?.includes(i)&&t.ids.some(id=>titleRaceKey(id)===titleRaceKey(r.id)))?'★目標レース':''}　${reason||(recommendedRace(h,r,programmeDate(r))?'<span class="osusume">オススメ</span>':'登録可能')}</small></div><button ${reason?'disabled':''} onclick="prepareEntry('${r.id}',${programmeDate(r)})">登録</button></div>`}).join('')}else if(k==='center'){label='トレセン';body=h.centerJob?`<p class="notice">委託中：残り ${h.centerJob.left}週。週送りで進行します。</p><button onclick="finishCentreNow()" ${state.progress.centreKeys?'':'disabled'}>即完了キーを使用（残り${state.progress.centreKeys||0}個）</button>`:`<div class="center-grid">${[['rest','コンディション調整'],['weight','馬体重増加'],['start','スタート強化'],['power','勝負根性強化'],['burst','瞬発力強化'],['long','長期育成（25週）'],...Object.entries(trainers).map(([id,[name,r]])=>[id,name+' · シルバー'+r+' / 馬封石'+(r===10?5:2)+'個'])].map(([a,n])=>`<button ${!ready(h)||h.entry||h.trainUsed||h.feedUsed||!centreAllowed(h,a)||h.week<(a==='long'?25:1)?'disabled':''} onclick="menuAction('center','${a}')">${n}${trainers[a]?'':a==='long'?' · 5000枚':['rest','weight'].includes(a)?' · 1000枚':' · 馬封石2個'}</button>`).join('')}</div>`}else if(k==='rest'){label='放牧';body=`<p class="notice">放牧中は残り育成週を消費せず、週送りに合わせて休養します。入厩で復帰できます。</p><button class="gold" onclick="closeMenu();pasture()" ${!ready(h)||h.entry||h.trainUsed||h.feedUsed?'disabled':''}>放牧する</button>`}else if(k==='history'){label='競走成績';body=h.results.length?historyTable(h):'出走記録はまだありません。'}else if(k==='pedigree'){label='血統表';body=`<table><tbody>${Array.from({length:6},(_,i)=>h.ancestry[i]||[]).map((r,i)=>`<tr><th>${i}代</th><td>${r.map(n=>esc(n||'不明')).join(' / ')||'未登録'}</td></tr>`).join('')}</tbody></table>`}else if(k==='detail'){label='競走馬詳細';body=detailSheet(h)}else if(k==='titles'){label='タイトル';body=titleTable(h)}else if(k==='traits'){label='特性';body=traitSheet(h)+`<p>特性：<b>${esc(h.trait||'なし')}</b>${h.traitEvolved?'（進化済）':''}</p><p>脚質：${esc(h.specialStyle||h.style)}${h.specialStyle?'（特殊脚質）':''} ／ 基本脚質 ${esc(h.style)}</p><p>芝・ダート適性：${h.dualSurface?'芝◎ ／ ダート◎（両適性・最高段階）':h.apt}</p>${h.legendOrigin?(()=>{const s=studs.find(v=>v.id===h.legendOrigin);return s?`<p>レジェンド生産：${esc(s.name)}（スキル ${esc(s.source?.[4]||'')} ／ 特性 ${esc(s.source?.[5]||'')}）</p>`:''})():''}`}else if(k==='hint'){label='育成アドバイス';body=`<div class="sec-bubble"><span class="staff-image portrait${Number(state.secretary)||0}"></span><p><b>${esc(secretaries[state.secretary||0])}</b>「${esc(fatigueWord(h))}${h.condition<60?'調子を整えてからレースへ向かいましょう。':'調子を保ちつつ、適性に合ったレースを目指しましょう。'}」</p></div><p>スタッフ評価：${rank(h)}</p>`}else{label='競走馬メニュー';body=`<div class="center-grid"><button onclick="openMenu('detail')">競走馬詳細</button><button onclick="openMenu('titles')">タイトル</button><button onclick="openMenu('center')">トレセン</button><button onclick="transferToBreeding()">引退・繁殖入り</button></div>`}
+function openMenu(k){if(k==="train"||k==="feed")return careRoom(k);let h=current();if(!h)return;let label='',body='';const syms=['🌿','🟫','⛰','🏊','🚧','🌳','🪵','🏇'];if(k==='condition'){label='デビュー・条件戦';body=`<p class="notice">条件戦を3戦すると入厩します。条件戦では現役50週を消費しません。</p><h3>${esc(h.name)}　${h.conditionResults.length}/3戦 · ${h.conditionWins}勝</h3>${debutHistory(h)}${h.debutDone?`<p class="notice">入厩決定！ スタッフ：${rank(h)}</p>${h.spent===0&&!h.entry&&!h.ageSelected?`<label>入厩区分<select id="startAge"><option value="3">3歳（クラシック路線）</option><option value="4">古馬</option></select></label>`:''}<button class="gold" onclick="if(document.getElementById('startAge')){current().bornYear=state.yearStart+Math.floor(state.clock/52)-(Number(document.getElementById('startAge').value)-3);current().ageSelected=true;render()}closeMenu()">育成へ</button>`:`<button class="gold" onclick="closeMenu();conditionRound(current())">結果だけ見る（スキップ）</button>`}`}else if(k==='race'){label='出走登録';body=h.entry?`<p class="notice">${esc(races.find(r=>r.id===h.entry.id).name)} / ${dateLabel(h.entry.at)}</p><button class="gold" onclick="raceWeek()">${raceAction(h)}</button><button onclick="closeMenu()">今週の育成に戻る</button><button onclick="closeMenu();cancelEntry()">登録を取り消す</button>`:`<p class="notice">レースを登録後、開催週に週送りするとレースが始まります。調教・飼葉は登録後も可能です。</p>`+calendarRaces.filter(r=>programmeDate(r)!==null).sort((a,b)=>programmeDate(a)-programmeDate(b)).map(r=>{let reason=eligible(h,r,programmeDate(r));return `<div class="race program-race" data-program="${r.id}"><div><span class="grade">${gradeLabel(r.grade)}</span>　<b>${esc(r.name)}</b><small style="display:block">${dateLabel(programmeDate(r))}　${r.apt} ${r.distance}m　${r.course||''}　${titles.some((t,i)=>h.favourites?.includes(i)&&t.ids.some(id=>titleRaceKey(id)===titleRaceKey(r.id)))?'★目標レース':''}　${reason||(recommendedRace(h,r,programmeDate(r))?'<span class="osusume">オススメ</span>':'登録可能')}</small></div><button ${reason?'disabled':''} onclick="prepareEntry('${r.id}',${programmeDate(r)})">登録</button></div>`}).join('')}else if(k==='center'){label='トレセン';const why=a=>centreReason(h,a);body=h.centerJob?`<p class="notice">委託中：残り ${h.centerJob.left}週。週送りで進行します。</p><button onclick="finishCentreNow()" ${state.progress.centreKeys?'':'disabled'}>即完了キーを使用（残り${state.progress.centreKeys||0}個）</button>`:`<div class="center-grid">${[['rest','コンディション調整'],['weight','馬体重増加'],['speed','スピード訓練'],['stamina','スタミナ訓練'],['start','スタート強化'],['power','勝負根性強化'],['burst','瞬発力強化'],['long','長期育成（25週）'],...Object.entries(trainers).map(([id,[name,r]])=>[id,name+' · シルバー'+r+' / 馬封石'+(r===10?5:2)+'個'])].map(([a,n])=>`<button ${why(a)?'disabled':''} onclick="menuAction('center','${a}')">${n}${trainers[a]?'':a==='long'?' · 5000枚':['rest','weight'].includes(a)?' · 1000枚':' · 馬封石2個'}${why(a)?`<small class="centre-why">${esc(why(a))}</small>`:''}</button>`).join('')}</div>`}else if(k==='rest'){label='放牧';body=`<p class="notice">放牧中は残り育成週を消費せず、週送りに合わせて休養します。入厩で復帰できます。</p><button class="gold" onclick="closeMenu();pasture()" ${!ready(h)||h.entry||h.trainUsed||h.feedUsed?'disabled':''}>放牧する</button>`}else if(k==='history'){label='競走成績';body=h.results.length?historyTable(h):'出走記録はまだありません。'}else if(k==='pedigree'){label='血統表';body=`<table><tbody>${Array.from({length:6},(_,i)=>h.ancestry[i]||[]).map((r,i)=>`<tr><th>${i}代</th><td>${r.map(n=>esc(n||'不明')).join(' / ')||'未登録'}</td></tr>`).join('')}</tbody></table>`}else if(k==='detail'){label='競走馬詳細';body=detailSheet(h)}else if(k==='titles'){label='タイトル';body=titleTable(h)}else if(k==='traits'){label='特性';body=traitSheet(h)+`<p>特性：<b>${esc(h.trait||'なし')}</b>${h.traitEvolved?'（進化済）':''}</p><p>脚質：${esc(h.specialStyle||h.style)}${h.specialStyle?'（特殊脚質）':''} ／ 基本脚質 ${esc(h.style)}</p><p>芝・ダート適性：${h.dualSurface?'芝◎ ／ ダート◎（両適性・最高段階）':h.apt}</p>${h.legendOrigin?(()=>{const s=studs.find(v=>v.id===h.legendOrigin);return s?`<p>レジェンド生産：${esc(s.name)}（スキル ${esc(s.source?.[4]||'')} ／ 特性 ${esc(s.source?.[5]||'')}）</p>`:''})():''}`}else if(k==='hint'){label='育成アドバイス';body=`<div class="sec-bubble"><span class="staff-image portrait${Number(state.secretary)||0}"></span><p><b>${esc(secretaries[state.secretary||0])}</b>「${esc(fatigueWord(h))}${h.condition<60?'調子を整えてからレースへ向かいましょう。':'調子を保ちつつ、適性に合ったレースを目指しましょう。'}」</p></div><p>スタッフ評価：${rank(h)}</p>`}else{label='競走馬メニュー';body=`<div class="center-grid"><button onclick="openMenu('detail')">競走馬詳細</button><button onclick="openMenu('titles')">タイトル</button><button onclick="openMenu('center')">トレセン</button><button onclick="transferToBreeding()">引退・繁殖入り</button></div>`}
 if(k==='history')body=`<div class="race-ledger">${gradeResults(h)}<section>${body}</section></div>`;
 if(k==='detail')body+=`<section class="identification"><h3>個体情報</h3>${horseFigure(h)}<p>${lookLabel(h)}</p><p>現在 ${h.weight}kg ／ ベスト ${h.ideal}kg</p></section>`;
 if(k==='detail')body+=jockeyPanel(h)+`<div class="row"><button onclick="openMenu('history')">戦績</button><button onclick="openMenu('pedigree')">血統</button><button onclick="openMenu('titles')">タイトル</button><button onclick="openMenu('expedition')">遠征</button></div>`;
@@ -1577,13 +1582,10 @@ async function managePlot(i){
  refreshFeature('farm')
 }
 function giveFruit(key){
- if(!['apple','banana'].includes(key))return;const h=current(),inv=state.progress.inventory;if(!ready(h)||h.feedUsed||!inv[key])return;
- inv[key]--;h.fatigue=clamp(h.fatigue-15);h.condition=clamp(h.condition+(key==='banana'?18:12));h.weight=clamp(h.weight+2,h.ideal-35,Math.max(h.weight,h.ideal+35));h.quality=clamp(h.quality+.5,0,h.cap);h.feedUsed=true;closeMenu();render()
+ const c=FARM_CROPS[key];if(!c)return;const h=current(),inv=state.progress.inventory;if(!ready(h)||h.feedUsed||!inv[key])return;
+ inv[key]--;h.fatigue=clamp(h.fatigue-c.fatigue);h.condition=clamp(h.condition+c.condition);h.weight=clamp(h.weight+c.weight,h.ideal-35,Math.max(h.weight,h.ideal+35));h.quality=clamp(h.quality+c.quality,0,h.cap);h.feedUsed=true;closeMenu();render()
 }
-function farmPanel(){
- const p=state.progress,planted=p.planted!=null,clock=String(p.seedBag).startsWith('clock'),left=clock?Math.ceil(realFarmRemaining()/60000):Math.max(0,p.planted+(p.seedBag==='deluxe'?6:3)-state.clock);
- return `<article class="field35"><h3>${assetIcon('seeds')}第1区画</h3><p>収穫すると育成飼料と生産のお守りを受け取れます。</p>${planted?`<p>${left?'収穫まで '+left+(clock?'分':'週'):'収穫できます。'}</p>`:seedChoice()}<button onclick="tendFarm()" ${planted&&left?'disabled':''}>${planted?'収穫する':'種をまく'}</button>${clock?`<button onclick="homeInfo('farm')">時刻を更新</button>`:''}</article>${extraPlots()}`;
-}
+function farmPanel(){return farmScreen()}
 async function tendFarm(){
  const p=state.progress;
  if(p.planted==null){const bag=$('seedBag')?.value||'standard';if(!await spend(bag==='standard'?15:300,'種まき'))return;p.seedBag=bag;p.planted=state.clock;if(bag.startsWith('clock'))p.harvestTime=Date.now()+3600000*({clock:2,clock6:6,clock12:12}[bag]||2)}
@@ -1738,13 +1740,13 @@ async function setRegularRider(){
  if(!ready(h)||h.entry||ownerRank()<4||h.regularRider===v||!riders[v]||state.progress.gems<1||!await askOwner('馬封石1個で主戦騎手を契約しますか？'))return;state.progress.gems--;
  h.regularRider=v;render();const view=$('menuDialog').dataset.view;if($('menuDialog').open&&view==='detail')openMenu('detail');else if($('menuDialog').open&&view==='finalResult')openMenu('condition');else showExtra('office');
 }
-async function partnerWorkout(fromMenu=false){
+async function partnerWorkout(fromMenu=false,tier=1){
  const h=current(),partner=studs.find(s=>s.id===(fromMenu?h?.partner:$('partnerPick')?.value));
  if(!ready(h)||ownerRank()<3||h.trainUsed||!partner||!unlocked(partner))return;
  const level=state.progress.awake[partner.id]||0;
- if(!await spend(workoutFee(partner,level),'パートナー調教'))return;
+ tier=[1,2,3].includes(tier)?tier:1;if(!await spend(fromMenu?partnerFee(partner,tier):workoutFee(partner,level),'P調教'+tier))return;
  const before=workoutSnapshot(h);h.partner=partner.id;h.trainUsed=true;h.training++;
- for(const [key,gain] of Object.entries(partnerEffects(partner,level)))h.stats[key]=clamp(h.stats[key]+gain,0,h.cap);h.weight=Math.max(h.ideal-35,h.weight-6);h.fatigue=clamp(h.fatigue+12);
+ const tierScale=fromMenu?[1,1.5,2][tier-1]:1;for(const [key,gain] of Object.entries(partnerEffects(partner,level)))h.stats[key]=clamp(h.stats[key]+Math.round(gain*tierScale*10)/10,0,h.cap);h.weight=Math.max(h.ideal-35,h.weight-6);h.fatigue=clamp(h.fatigue+12);
  if(level===4&&partner.source?.[3]&&!partner.source[3].includes('なし'))h.specialStyle=partner.source[3];
  recordWorkout(h,partner.name+'とパートナー調教',before);log(h.name+'：'+partner.name+'と調教');render();if(fromMenu){closeMenu();if(!state.skipCare)careReceipt(h,before,'パートナー調教')}else showExtra('office');
 }
@@ -1805,9 +1807,9 @@ function exchangeSeries(){
  state.seriesPoints-=3;state.progress.inventory.charm++;render();showExtra('office');
 }
 function feedPet(){
- const food=$('petFood')?.value||'feed';if(!['feed','apple','banana'].includes(food)||!state.progress.inventory[food]||state.petWeek===state.clock)return;
+ const food=$('petFood')?.value||'feed';if(!(food==='feed'||FARM_CROPS[food])||!state.progress.inventory[food]||state.petWeek===state.clock)return;
  state.pet=$('petPick').value;state.petWeek=state.clock;state.progress.inventory[food]--;
- const key=pick(Object.keys(charmTypes));if(seeded()<(food==='feed'?.65:.85)){state.progress.inventory[key]++;log(state.pet+'が'+charmTypes[key][0]+'を見つけました')}else log(state.pet+'が作物を食べて元気になりました');render();showExtra('office');
+ const key=pick(Object.keys(charmTypes));if(seeded()<(food==='feed'?.65:.85)){state.progress.inventory[key]++;log(state.pet+'が'+charmTypes[key][0]+'を見つけました')}else log(state.pet+'が作物を食べて元気になりました');save();refreshFeature('farm');
 }
 
 function entryFee(g,r){
@@ -2433,6 +2435,108 @@ function showRace(replay){
   requestAnimationFrame(frame);
 }
 
+/* ===== 第13弾：監査§3（調教・飼葉・トレセン・パートナー・農園・神社） ===== */
+const SECRET_CHOICES=[['逃げ','start'],['先行','power'],['差し','burst'],['追込','speed']];
+// 農園の作物（12種）。効果は表示・飼葉用。リンゴ・バナナは旧データの在庫キーを引き継ぐ
+const FARM_CROPS={
+ apple:{name:'リンゴ',icon:'🍎',effect:'疲労回復・調子上昇',fatigue:15,condition:12,weight:2,quality:.5,tier:1},
+ orange:{name:'オレンジ',icon:'🍊',effect:'調子上昇・疲労回復',fatigue:10,condition:15,weight:2,quality:.4,tier:1},
+ lemon:{name:'レモン',icon:'🍋',effect:'疲労回復・体重減',fatigue:18,condition:8,weight:-2,quality:.4,tier:1},
+ banana:{name:'バナナ',icon:'🍌',effect:'調子上昇・体重増加',fatigue:15,condition:18,weight:2,quality:.5,tier:1},
+ strawberry:{name:'イチゴ',icon:'🍓',effect:'調子上昇・成長',fatigue:12,condition:16,weight:1,quality:.8,tier:2},
+ grape:{name:'ブドウ',icon:'🍇',effect:'疲労回復・成長',fatigue:20,condition:10,weight:1,quality:.8,tier:2},
+ juiceMix:{name:'ミックスジュース',icon:'🧃',effect:'疲労回復・調子上昇',fatigue:28,condition:20,weight:0,quality:.8,tier:0},
+ juiceBerry:{name:'ベリージュース',icon:'🥤',effect:'調子上昇・成長',fatigue:22,condition:24,weight:0,quality:1.2,tier:0},
+ peach:{name:'モモ',icon:'🍑',effect:'調子上昇・疲労回復',fatigue:18,condition:18,weight:2,quality:.8,tier:2},
+ mango:{name:'マンゴー',icon:'🥭',effect:'成長・調子上昇',fatigue:15,condition:18,weight:3,quality:1.3,tier:3},
+ durian:{name:'ドリアン',icon:'🌰',effect:'成長・体重増加',fatigue:10,condition:10,weight:6,quality:1.6,tier:3},
+ mangosteen:{name:'マンゴスチン',icon:'🟣',effect:'疲労回復・成長',fatigue:30,condition:20,weight:2,quality:1.4,tier:3}
+};
+const SEED_BAGS={normal:['普通のタネ袋',20,3,1],passion:['情熱のタネ袋',100,4,2],luxury:['豪華なタネ袋',300,6,3]};
+const JUICES={juiceMix:['apple','orange','lemon'],juiceBerry:['strawberry','grape','peach']};
+function luckyOwner(){const o=state.progress?.omikuji;return Boolean(o&&o.at===state.clock&&o.fortune==='大吉')}
+// 極秘調教：週ごとにセーブ内シードで抽選し、結果だけを保存する（予測不能・再読込で変わらない）
+function secretAvailable(h){
+ if(!h)return false;
+ if(h.secretRoll?.at!==state.clock){h.secretRoll={at:state.clock,hit:seeded()<.2};try{save()}catch{}}
+ return Boolean(h.secretRoll.hit);
+}
+function recommendedCourse(h){
+ if(h.fatigue>40&&(stableLevel()>=5||luckyOwner()))return 'spa';
+ const keys={0:'speed',1:'stamina',2:'burst',3:'stamina',4:'start',6:'stamina',8:'burst'};
+ const weakest=Object.entries(keys).sort((a,b)=>h.stats[a[1]]-h.stats[b[1]])[0];
+ return Number(weakest?.[0]??0);
+}
+function partnerFee(card,tier){
+ const m=String(card?.source?.[6]||'').match(new RegExp('(?:P調教|パートナー調教)'+tier+'(?:コスト)?\\s*(\\d+)枚'));
+ return m?Number(m[1]):[15,30,60][tier-1]||15;
+}
+function centreReason(h,a){
+ if(!ready(h))return '入厩中のみ';if(h.entry)return '出走登録中';if(h.trainUsed||h.feedUsed)return '今週は調教・飼葉済み';
+ if(ownerRank()<2)return 'セレブランク シルバー2で開放';
+ if(trainers[a]&&ownerRank()<trainers[a][1])return 'シルバー'+trainers[a][1]+'で開放';
+ if(trainers[a]&&trainers[a][1]>=10&&(h.eliteCount||0)>=3)return '特訓は3回まで';
+ if(h.week<(a==='long'?25:1))return '残り週が不足';
+ return '';
+}
+function cropName(id){return FARM_CROPS[id]?.name||({feed:'特別配合飼料'})[id]||id}
+function farmScreen(){
+ const p=state.progress;p.farm??=[null,null,null];
+ const plot=(v,i)=>{
+  if(!v)return `<article class="farm-plot empty"><b>畑 ${i+1}</b><p>空き畑</p><div class="seed-buttons">${Object.entries(SEED_BAGS).map(([id,[n,cost,weeks]])=>`<button onclick="plantSeed(${i},'${id}')">${n}<small>${cost}枚 · ${weeks}週</small></button>`).join('')}</div></article>`;
+  const left=Math.max(0,v.due-state.clock);
+  return `<article class="farm-plot ${left?'growing':'ripe'}"><b>畑 ${i+1}</b><p class="plot-crop">${SEED_BAGS[v.bag]?.[0]||'タネ'}</p>${left?`<p class="plot-timer">収穫まで あと${left}週</p>`:'<span class="ripe-badge">収穫可能</span>'}<button onclick="harvestPlot(${i})" ${left?'disabled':''}>収穫する</button></article>`;
+ };
+ const legacy=[];
+ if(p.planted!=null){const clock=String(p.seedBag).startsWith('clock'),left=clock?Math.ceil(realFarmRemaining()/60000):Math.max(0,p.planted+(p.seedBag==='deluxe'?6:3)-state.clock);legacy.push(`<article class="farm-plot legacy"><b>旧区画</b><p>${left?'収穫まで '+left+(clock?'分':'週'):'収穫できます'}</p><button onclick="tendFarm()" ${left?'disabled':''}>収穫する</button></article>`)}
+ (p.plots||[]).forEach((v,i)=>{if(v){const left=Math.max(0,v.due-state.clock);legacy.push(`<article class="farm-plot legacy"><b>旧区画${i+2}</b><p>${left?'あと'+left+'週':'収穫可'}</p><button onclick="managePlot(${i})" ${left?'disabled':''}>収穫する</button></article>`)}});
+ const inv=p.inventory;
+ const grid=Object.entries(FARM_CROPS).map(([id,c])=>`<div class="crop-cell ${inv[id]?'':'none'}"><span>${c.icon}</span><small>${c.name}</small><b>${Math.min(99,inv[id]||0)}/99</b></div>`).join('');
+ const juice=Object.entries(JUICES).map(([id,need])=>`<button onclick="makeJuice('${id}')" ${need.every(k=>inv[k]>0)?'':'disabled'}>${FARM_CROPS[id].icon} ${FARM_CROPS[id].name}を作る<small>${need.map(cropName).join('＋')}</small></button>`).join('');
+ const foods=['feed',...Object.keys(FARM_CROPS)].filter(k=>inv[k]>0);
+ const pet=`<section class="farm-pet"><h3>ペット</h3><span id="petPortrait">${petIcon(state.pet)}</span><select id="petPick" onchange="document.getElementById('petPortrait').innerHTML=petIcon(this.value)">${['子ブタ','白ヤギ','柴犬','ネコ','ニワトリ'].map(n=>`<option ${n===state.pet?'selected':''}>${n}</option>`).join('')}</select><label>餌の器<select id="petFood">${foods.length?foods.map(k=>`<option value="${k}">${esc(cropName(k))} · ${inv[k]}個</option>`).join(''):'<option value="">農園飼葉がありません</option>'}</select></label><button onclick="feedPet()" ${foods.length&&state.petWeek!==state.clock?'':'disabled'}>${state.petWeek===state.clock?'今週は餌やり済み':'餌をあげる'}</button></section>`;
+ return `<div class="farm-screen"><div class="farm-fields"><p class="muted">肥料 ${inv.fertilizer||0}個　タネ袋は種類ごとに収穫物が変わります（豪華ほど珍しい作物）。</p><div class="farm-plots">${p.farm.map(plot).join('')}${legacy.join('')}</div></div><section class="farm-feed"><h3>農園飼葉</h3><div class="crop-grid">${grid}</div><div class="juice-row">${juice}</div></section>${pet}</div>`;
+}
+async function plantSeed(i,bag){
+ const p=state.progress;p.farm??=[null,null,null];const b=SEED_BAGS[bag];if(!b||p.farm[i]||!await spend(b[1],b[0]))return;
+ p.farm[i]={bag,due:state.clock+b[2]};save();refreshFeature('farm');
+}
+function harvestPlot(i){
+ const p=state.progress,v=p.farm?.[i];if(!v||v.due>state.clock)return;
+ const tier=SEED_BAGS[v.bag]?.[3]||1,pool=Object.entries(FARM_CROPS).filter(([,c])=>c.tier&&c.tier<=tier&&c.tier>=Math.max(1,tier-1)).map(([id])=>id);
+ const got={};for(let n=0;n<3+(tier===3?1:0);n++){const id=pool[Math.floor(seeded()*pool.length)];got[id]=(got[id]||0)+1;p.inventory[id]=Math.min(99,(p.inventory[id]||0)+1)}
+ p.farm[i]=null;log('農園で '+Object.entries(got).map(([k,n])=>cropName(k)+'×'+n).join('・')+' を収穫しました');save();refreshFeature('farm');
+}
+function makeJuice(id){
+ const need=JUICES[id],inv=state.progress.inventory;if(!need||!need.every(k=>inv[k]>0))return;
+ for(const k of need)inv[k]--;inv[id]=Math.min(99,(inv[id]||0)+1);log(FARM_CROPS[id].name+'を作りました');save();refreshFeature('farm');
+}
+// 神社：富くじ（富札で引く）とおみくじ（週1回）
+const TOMIKUJI_PRIZES=[['star','星の欠片',40],['charm','お守り',32],['gems','馬封石×3',15],['mariko','馬里子像',8],['orb','伝説の宝玉',5]];
+const OMIKUJI=[['大吉','ラッキー馬主！今週は温泉・森林馬道が厩舎Lvに関係なく使えます。',10],['中吉','メダル300枚を授かりました。',20],['小吉','にんじん代が浮きました（メダル100枚）。',25],['吉','穏やかな一週間になりそうです。',30],['末吉','焦らず、一歩ずつ。',15]];
+function shrineScreen(){
+ const p=state.progress,o=p.omikuji;
+ return `<h2>神社</h2><div class="shrine-screen"><section class="tomikuji"><h3>富くじ</h3><p>富札 ${p.shrineTickets||0}枚</p><ul class="prize-list">${TOMIKUJI_PRIZES.map(([,n,w])=>`<li>${esc(n)}<small>${w}%</small></li>`).join('')}</ul><button ${p.shrineTickets?'':'disabled'} onclick="drawTomikuji()">富くじを引く（富札1枚）</button><p>${esc(p.lastShrine||'')}</p></section><section class="omikuji"><h3>おみくじ</h3>${o&&o.at===state.clock?`<p class="fortune">${esc(o.fortune)}</p><p>${esc((OMIKUJI.find(x=>x[0]===o.fortune)||[])[1]||'')}</p>`:'<p>週に1回引けます。</p>'}<button ${o&&o.at===state.clock?'disabled':''} onclick="drawOmikuji()">おみくじを引く</button></section><section class="shrine-goods"><h3>授与品</h3><p>星の欠片 ${p.inventory.star||0}個　馬里子像 ${p.inventory.mariko||0}体</p><button ${(p.inventory.star||0)>=10?'':'disabled'} onclick="starExchange()">星の欠片10個 → 伝説の宝玉1個</button></section></div>`;
+}
+async function drawTomikuji(){
+ const p=state.progress;if(!p.shrineTickets||!await askOwner('富札を1枚使って富くじを引きますか？'))return;
+ p.shrineTickets--;let roll=seeded()*100,prize=TOMIKUJI_PRIZES[0];for(const x of TOMIKUJI_PRIZES){if(roll<x[2]){prize=x;break}roll-=x[2]}
+ let text=prize[1];
+ if(prize[0]==='star')p.inventory.star=(p.inventory.star||0)+1;
+ else if(prize[0]==='charm'){const key=pick(Object.keys(charmTypes));p.inventory[key]=(p.inventory[key]||0)+1;text=charmTypes[key][0]}
+ else if(prize[0]==='gems')p.gems=(p.gems||0)+3;
+ else if(prize[0]==='mariko')p.inventory.mariko=(p.inventory.mariko||0)+1;
+ else if(prize[0]==='orb')p.legendOrbs=(p.legendOrbs||0)+1;
+ p.lastShrine='富くじ：'+text+'が当たりました！';sfx('coin');save();showExtra('shrine');
+}
+function drawOmikuji(){
+ const p=state.progress;if(p.omikuji?.at===state.clock)return;
+ let roll=seeded()*100,f=OMIKUJI[OMIKUJI.length-1];for(const x of OMIKUJI){if(roll<x[2]){f=x;break}roll-=x[2]}
+ p.omikuji={at:state.clock,fortune:f[0]};if(f[0]==='中吉')state.medals+=300;if(f[0]==='小吉')state.medals+=100;
+ sfx(f[0]==='大吉'?'great':'success');save();showExtra('shrine');
+}
+function starExchange(){const inv=state.progress.inventory;if((inv.star||0)<10)return;inv.star-=10;state.progress.legendOrbs=(state.progress.legendOrbs||0)+1;save();showExtra('shrine')}
+
 /* ===== 第13弾：監査§2（厩舎・競走馬詳細・戦績・タイトル・最終結果）。表示中心、セーブは追加項目のみ ===== */
 function nextRaceLabel(h,r){const d=(h.entry?.at??state.clock)-state.clock;return (d<=0?'今週':d+'週後')+'　'+gradeLabel(r.grade)+'　'+r.name}
 function titleBadge(h){const fav=(h.favourites||[]).map(i=>titles[i]?.name).find(n=>n&&h.titles.includes(n));return fav||h.titles[0]||'タイトル'}
@@ -2969,7 +3073,8 @@ function sayLocal(line,accent=0){
  parts.filter(Boolean).forEach((part,i)=>{const u=new SpeechSynthesisUtterance(part);u.voice=voice;u.lang='ja-JP';u.pitch=i?.88:1.04;u.volume=(state.voiceVolume??75)/100;speechSynthesis.speak(u)});
 }
 function readName(){const name=$('birthReading').value||$('birthName').value;sayLocal(name,Number($('birthAccent').value))}
-function secretaryTip(h){
+function secretaryTip(h,course=null){
+ if(h&&course&&!h.trip&&h.week>0&&h.debutDone){const name=course.name,eff=String(course.effect||'').split(/[・/]/)[0];if(course.id==='secret')return '極秘調教のチャンスです！脚質と伸ばしたい能力を選びましょう。';if(course.id==='partner')return name+'で、'+eff+'。パートナーの得意分野を伸ばせます。';if(course.id==='spa')return '温泉でゆっくり疲れを取りましょう。';return name+'コースの調教で、'+String(course.effect||'').replace(/・/g,'と')+'をつけさせましょう。'}
  if(!h)return '生産で父馬と母馬を選び、仔馬を迎えましょう。';
  if(h.trip)return status(h)+'です。週送りで帰還を待ちましょう。';
  if(h.week===0)return '現役期間を終えました。厩舎の「繁殖入りへ」から次の世代につなげられます。';
@@ -3007,7 +3112,7 @@ function seriesSkill(v,support,race={}){
  const lv=Number(text.match(/Lv\s*(\d)/i)?.[1]||1);return lv*.9;
 }
 function bonusFeed(h){return h.bonusWeek===state.clock&&!h.feedUsed}
-async function extraCare(which){
+async function extraCare(which,choice=0){
  const h=current();if(!ready(h))return;const before=workoutSnapshot(h);
  if(which==='feast'){
    if(!bonusFeed(h))return;
@@ -3015,10 +3120,11 @@ async function extraCare(which){
  }else{
    if(h.trainUsed)return;
    if(which==='secret'){
-     if(((state.clock*31+[...h.id].reduce((a,c)=>a+c.charCodeAt(0),0))%5)!==0||!await spend(20,'特別調教'))return;
-     h.style=styles[(styles.indexOf(h.style)+1)%styles.length];const key=({'逃げ':'start','先行':'power','差し':'burst','追込':'speed'})[h.style]||'start';h.stats[key]=clamp(h.stats[key]+5,0,h.cap);h.fatigue=clamp(h.fatigue+17);h.weight=clamp(h.weight-8,h.ideal-35,Math.max(h.weight,h.ideal+35));
+     const pickSecret=SECRET_CHOICES[choice]||SECRET_CHOICES[0];
+     if(!secretAvailable(h)||!await spend(20,'極秘調教'))return;
+     h.style=pickSecret[0];const key=pickSecret[1];h.stats[key]=clamp(h.stats[key]+5,0,h.cap);h.fatigue=clamp(h.fatigue+17);h.weight=clamp(h.weight-8,h.ideal-35,Math.max(h.weight,h.ideal+35));
    }else{
-     if(stableLevel()<5||!await spend(4,'牧場調整'))return;
+     if((stableLevel()<5&&!luckyOwner())||!await spend(4,'牧場調整'))return;
      if(which==='spa'){h.fatigue=clamp(h.fatigue-37);h.condition=clamp(h.condition+9)}
      else{h.stats.temper=clamp(h.stats.temper+3,0,h.cap);h.weight=clamp(h.weight+4,h.ideal-35,Math.max(h.weight,h.ideal+35))}
    }
@@ -3050,14 +3156,8 @@ function runPattern(v,t){
 }
 function realFarmRemaining(){return Math.max(0,(state.progress.harvestTime||0)-Date.now())}
 function seedChoice(){return '<label>タネ袋<select id="seedBag"><option value="standard">通常 · 15枚 / 3週</option><option value="deluxe">豪華 · 300枚 / 6週</option><option value="clock">時計栽培 · 300枚 / 2時間</option><option value="clock6">時計栽培 · 300枚 / 6時間</option><option value="clock12">時計栽培 · 300枚 / 12時間</option></select></label>'}
-function shrine(){
- const p=state.progress;
- return `<h2>牧場の神社</h2><p>富札 ${p.shrineTickets||0}枚　日替わり支給で1枚受け取れます。</p><button ${p.shrineTickets?'':'disabled'} onclick="redeemShrine()">富札を奉納</button><p>${esc(p.lastShrine||'')}</p>`;
-}
-async function redeemShrine(){
- const p=state.progress;if(!p.shrineTickets||!await askOwner('富札を1枚奉納しますか？'))return;
- const key=pick(Object.keys(charmTypes));p.shrineTickets--;p.inventory[key]++;p.lastShrine=charmTypes[key][0]+'を受け取りました。';save();showExtra('shrine');
-}
+function shrine(){return shrineScreen()}
+async function redeemShrine(){return drawTomikuji()}
 async function retrySeries(){if(state.failedSeries&&state.progress.gems>0&&await askOwner('馬封石1個で再挑戦しますか？')){state.progress.gems--;state.series=state.failedSeries;state.failedSeries=null;render();showExtra('office')}}
 function seriesExtras(){
  const p=state.progress,seen=p.seenRivals||[],logbook=p.seriesBook||[];
