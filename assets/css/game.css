@@ -497,3 +497,37 @@ dialog{max-height:calc(100dvh - 8px)}
 
 /* 5-4：オススメバッジ（ピンク） */
 .osusume{display:inline-block;background:linear-gradient(#ff7cb4,#e5408a);color:#fff;font-weight:800;font-size:.85em;padding:1px 8px;border-radius:999px;border:1px solid #fff8;box-shadow:0 1px 3px #0005;letter-spacing:.05em}
+
+/* ---- 第13弾：監査§2 ---- */
+.pill-sub{display:block;font-size:.62em;font-weight:700;opacity:.85;margin-top:1px}
+.omakase-chip[aria-pressed=true]{background:linear-gradient(#7fd28f,#3f9a55)!important;color:#fff!important}
+.title-badge{max-width:11em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.detail-sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:4px;margin:6px 0}
+.detail-sheet>div,.rank-cell{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#ffffff14;border:1px solid #ffffff22;border-radius:6px;padding:5px 9px}
+.detail-sheet span,.rank-cell span{font-size:.85em;opacity:.85}
+.rank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px;margin:8px 0}
+.rank-cell b{font-size:1.25em;font-weight:900;min-width:1.4em;text-align:center}
+.rank-S{color:#ff6b6b}.rank-A{color:#ffb347}.rank-B{color:#f3e06b}.rank-C{color:#8fd694}.rank-D{color:#8cc5ef}.rank-E{color:#b9b9c9}.rank-q{opacity:.6}
+.sec-bubble{display:flex;gap:10px;align-items:center;margin:8px 0}
+.sec-bubble .staff-image{flex:none;width:52px;height:64px;border-radius:8px}
+.sec-bubble p{position:relative;margin:0;background:#fffdf3;color:#2b2b24;border:2px solid #d8c07a;border-radius:12px;padding:8px 12px;line-height:1.5}
+.sec-bubble p:before{content:"";position:absolute;left:-10px;top:50%;margin-top:-7px;border:7px solid transparent;border-right-color:#d8c07a;border-left:0}
+.jockey-panel,.trait-box{background:#ffffff10;border:1px solid #ffffff2a;border-radius:8px;padding:8px 12px;margin:8px 0}
+.jockey-panel h3,.trait-box h3{margin:0 0 4px;font-size:1em}
+.trait-name{font-size:1.15em;font-weight:800;margin:2px 0}
+.lineage-badge{display:inline-block;background:#3a2a10;color:#ffe2a0;border:1px solid #c9a35a;border-radius:999px;padding:3px 14px;margin:0 0 8px}
+.history-table td,.history-table th{white-space:nowrap;padding:4px 8px}
+.history-table tr.win td{background:#d7ae5a22}
+.grade-record dl{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0 0 8px}
+.grade-record dt{opacity:.8}.grade-record dd{margin:0;font-weight:700}
+.title-table td{vertical-align:top;padding:5px 8px}.title-table tr.won td{background:#d7ae5a22}
+.fav-count{font-weight:800;margin:0 0 6px}
+.final-result{display:grid;grid-template-columns:minmax(200px,280px) minmax(0,1fr);gap:14px}
+.final-score{font-size:1.4em;font-weight:900;margin:0 0 6px}
+.final-panels{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.final-panels article{background:#ffffff12;border:1px solid #ffffff30;border-radius:10px;padding:10px}
+.final-panels h4{margin:0 0 6px}
+.final-panels small{display:block;color:#ffb3a8;margin-top:4px}
+.final-panels .lock{opacity:.75;margin:0}
+.enter-stable{display:block;width:100%;margin-top:10px;padding:12px;font-size:1.15em;font-weight:900;color:#fff!important;background:linear-gradient(#6fd17f,#2f8f45)!important;border:2px solid #d8ffd9!important;border-radius:999px!important}
+@media(max-width:640px){.final-result{grid-template-columns:1fr}.final-panels{grid-template-columns:1fr}}
