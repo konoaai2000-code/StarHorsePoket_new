@@ -118,7 +118,7 @@ function crossLineage(h){
  return damSire?bySource.get(damSire)?.line||h.line:h.line
 }
 
-function inheritType(a,b){const d=Math.abs(a.quality-b.quality);return d<=9?'堅実型':(a.quality+b.quality)/2>=85?'一発型':'爆発型'}
+function inheritType(a,b){const d=Math.abs(a.quality-b.quality);return d<=9?'堅実型':(a.quality+b.quality)/2>=85?'一発型':d>=22?'爆発型':'平均型'}
 function theory(a,b){
  const dad=a.source?.[0]||(!a.retired?a.name:null),mom=b.source?.[0]||(!b.retired?b.name:null),grandfather=mom?heritage.data[mom]?.[0]:studs.find(v=>v.id===b.parentIds?.[0])?.source?.[0];
  const reference=fixedPairs.get(dad+'|'+mom);
@@ -514,7 +514,7 @@ function drawParents(side){
  const order=$('parentOrder').value;if(order==='距離順')candidates.sort((a,b)=>a.distance-b.distance);
  if(order==='覚醒順')candidates.sort((a,b)=>(state.progress.awake[b.id]||0)-(state.progress.awake[a.id]||0));
  $('parentChoices').innerHTML=candidates.map(v=>{
- const inherit=partner?inheritType(v,partner):'爆発型';
+ const inherit=partner?inheritType(v,partner):'―';
  if(!father&&state.matingFilter&&state.matingFilter!=='すべて'&&state.matingFilter!==inherit)return '';
  return `<article><div><b>${esc(v.name)}</b>　${cardBadge(v)}<small>${esc(v.line)}・${esc(v.apt)} ${v.distance}m・${inherit}</small></div><button onclick="chooseParent('${side}','${v.id}')">選択</button></article>`
  }).join('')||'<p>条件に合う候補はいません。</p>'
@@ -783,10 +783,7 @@ function backdrop(){return `<svg class="scene-bg" viewBox="0 0 1000 562" preserv
 function portrait(h){return `<svg class="portrait" viewBox="0 0 350 400" aria-label="馬房の競走馬"><defs><linearGradient id="coat" x1="0" y1=".3" x2="1" y2=".7"><stop stop-color="#2f211c"/><stop offset=".34" stop-color="${h.color}"/><stop offset=".7" stop-color="${h.color}"/><stop offset="1" stop-color="#35231f"/></linearGradient><linearGradient id="muzzle" x2="0" y2="1"><stop stop-color="#65483e"/><stop offset="1" stop-color="#251f1d"/></linearGradient><linearGradient id="rail" x2="0" y2="1"><stop stop-color="#a3ad92"/><stop offset=".45" stop-color="#667c71"/><stop offset="1" stop-color="#37463c"/></linearGradient></defs><path d="M50 392Q34 315 76 242Q98 205 118 157L142 105Q150 72 178 57Q199 55 215 77L242 99Q259 119 252 145L233 177Q212 215 194 262L195 392Z" fill="url(#coat)" stroke="#342823" stroke-width="2"/><path d="M112 193Q125 110 152 72Q168 54 190 66L193 101Q167 120 150 165Q128 215 107 236Z" fill="#241d1b"/><path d="M167 73Q143 33 152 12Q173 17 183 60M204 69Q221 26 235 23Q240 50 218 82" fill="url(#coat)" stroke="#332621" stroke-width="3"/><path d="M158 23L177 61 166 53Z M230 34L216 64 215 53Z" fill="#b17d6c"/><path d="M172 64Q195 47 220 75Q241 84 248 111L257 154Q275 181 263 204Q251 222 229 219Q209 215 199 198L182 157Q155 124 160 94Z" fill="url(#coat)" stroke="#403029" stroke-width="2"/><path d="M181 63Q197 49 217 67L228 90 205 76 209 98 185 84 173 108 165 89Z" fill="#2d2420"/><path d="M204 85L215 109 213 133 226 160 219 165 204 139 201 112 193 91Z" fill="#ebe2ca" opacity=".94"/><path d="M229 110Q243 105 245 118Q237 130 229 120Z" fill="#221b18"/><circle cx="239" cy="115" r="2.2" fill="#d9e2d6"/><path d="M215 173Q241 159 263 179Q275 201 252 216Q230 220 218 201Z" fill="url(#muzzle)"/><ellipse cx="253" cy="190" rx="7" ry="10" transform="rotate(25 253 190)" fill="#181817"/><path d="M238 211Q251 210 260 206" stroke="#171716" stroke-width="2" fill="none"/><path d="M109 256Q143 225 164 230Q140 272 151 342" stroke="#f7d4af" stroke-opacity=".15" stroke-width="10" fill="none"/><rect x="5" y="316" width="340" height="14" rx="2" fill="url(#rail)" stroke="#303d34"/><rect x="5" y="361" width="340" height="14" rx="2" fill="url(#rail)" stroke="#303d34"/></svg>`}
 function switchHorse(d){let n=state.horses.length;if(!n)return;let i=state.horses.findIndex(h=>h.id===state.selected);selectHorse(state.horses[(i+d+n)%n].id)}
 function stable(){let h=current();if(!h)return `<div class="stable-screen empty-stable">${backdrop()}<div class="glass-card"><h2>空き馬房</h2><p>生産から競走馬を迎えよう</p><button class="gold" onclick="go('breed')">競走馬を生産</button></div></div>`;let next=h.entry?races.find(r=>r.id===h.entry.id):null;let rate=v=>!h.debutDone&&!h.legendOrigin?'？':v>=78?'◎':v>=59?'○':v>=43?'△':'？';return `<div class="stable-screen">${backdrop()}<div class="horse-picker"><button class="title-chip" onclick="openRoster()">一覧</button><button class="title-chip" onclick="newProduction()">新規生産</button><button class="title-chip title-badge" onclick="openMenu('titles')">★ ${esc(titleBadge(h))}</button><button class="title-chip omakase-chip" aria-pressed="${h.autoCourse===-2}" onclick="toggleOmakase()">おまかせ育成 ${h.autoCourse===-2?'ON':'OFF'}</button><select aria-label="競走馬選択" onchange="selectHorse(this.value)">${state.horses.map(v=>`<option value="${v.id}" ${v.id===h.id?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div><div class="top-program"><div class="program"><small>レーシングプログラム</small>${esc(currentProgram().map(r=>r.name).join(' / ')||'通常開催')}</div><button class="weekbox nextweek" onclick="weekDialog()">${dateLabel()} ▶</button></div><aside class="horse-info"><div class="glass-card schedule-box"><strong>次走予定</strong><span>${next?esc(nextRaceLabel(h,next)):status(h)}</span></div><div class="glass-card"><div class="horse-name"><span>${esc(h.name)}</span><b>${h.weight}kg</b></div><div class="details-grid"><span>${h.sex}${3+Math.max(0,state.yearStart+Math.floor(state.clock/52)-h.bornYear)}　${h.style}</span><span>${h.gen}代目</span><span>引退まで</span><span>${h.week} 週</span><span>競走成績</span><span>${h.results.length}戦 ${wins(h)}勝</span><span>獲得賞金</span><span>${(h.earnings||0).toLocaleString()}枚</span><span>調子</span><span>${h.condition>=80?'絶好調':h.condition>=60?'好調':h.condition>=40?'普通':'不調'}</span></div><div class="mini-bar"><i style="width:${clamp(h.condition)}%"></i></div><div class="apt-grid"><div>距離適性<b>${Math.max(1000,horseRange(h)[0])}–${horseRange(h)[1]}</b></div><div>気性<b>${temperWord(h)}</b></div><div>芝<b>${!h.debutDone&&!h.legendOrigin?'？':h.apt==='芝'||h.dualSurface?'◎':'△'}</b></div><div>ダート<b>${!h.debutDone&&!h.legendOrigin?'？':h.apt==='ダート'||h.dualSurface?'◎':'△'}</b></div><div>スタート<b>${statMark(h,'start')}</b></div><div>瞬発力<b>${statMark(h,'burst')}</b></div><div>勝負根性<b>${statMark(h,'power')}</b></div><div>脚質<b>${esc(h.specialStyle||h.style)}</b></div><div>道悪<b>${!h.debutDone&&!h.legendOrigin?'？':displayRank(h.mud||45,h.legendOrigin)}</b></div></div><div class="info-buttons"><button class="silver" onclick="openMenu('history')">戦績</button><button class="silver" onclick="openMenu('pedigree')">血統表</button><button class="silver" onclick="openMenu('detail')">詳細</button></div></div></aside><div class="horse-stage individual-stall" role="group" aria-label="馬房の${esc(h.name)}">${horseFigure(h,state.stallCloseup?'head':'adult')}<button class="inspect38" onclick="inspectModel()">3Dで見る</button><button class="stall-view" aria-pressed="${!!state.stallCloseup}" onclick="state.stallCloseup=!state.stallCloseup;render()">${state.stallCloseup?'全身':'馬装を見る'}</button><button class="horse-inspect"  onclick="openMenu('detail')" aria-label="競走馬の詳細"></button><button class="arrow left" aria-label="前の馬" onclick="switchHorse(-1)">❮</button><button class="arrow right" aria-label="次の馬" onclick="switchHorse(1)">❯</button></div><aside class="actions-side"><button class="pill-action red" onclick="transferToBreeding()">${h.week===0?'繁殖入りへ':'引退・繁殖入り'}</button>${!h.debutDone?`<button class="pill-action red" onclick="openMenu('condition')">デビュー<small class="pill-sub">条件戦 ${h.conditionResults.length}/3</small></button>`:h.entry?`<button class="pill-action red" onclick="openMenu('race')">${h.entry.at<=state.clock?'今週の出走へ':'次走予定'}</button>`:`<button class="pill-action red" onclick="openMenu('race')" ${!ready(h)?'disabled':''}>出走</button>`}${h.location==='pasture'?`<button class="pill-action green" onclick="returnStable()">入厩</button>`:`<button class="pill-action green" onclick="openMenu('rest')" ${!ready(h)||h.entry||h.trainUsed||h.feedUsed?'disabled':''}>放牧</button>`}<button class="pill-action purple" onclick="openMenu('center')" ${h.location==='center'?'':!ready(h)||h.entry||h.trainUsed||h.feedUsed?'disabled':''}>トレセン${h.centerJob?' 残'+h.centerJob.left+'週':''}</button><button class="silver" onclick="openMenu('hint')">ヒント</button></aside><div class="action-bottom"><div class="stable-status"><b>${esc(state.stableName||'クロニクル厩舎')}　${state.horses.length}/${stallCount()}頭</b><span>${esc(state.log[0]||'育成を開始しましょう')}</span></div><div class="bottom-buttons"><button class="pill-action green" onclick="openMenu('train')" ${!ready(h)||h.trainUsed?'disabled':''}><span class="icon">🏇</span>${h.trainUsed?'調教済':'調教'}</button><button class="pill-action red" onclick="openMenu('feed')" ${!ready(h)||h.feedUsed?'disabled':''}><span class="icon">🥕</span>${h.feedUsed?'飼葉済':'飼葉'}</button></div><div class="small-menu"><button class="gold" onclick="weekDialog()">週送り ▶</button><button class="silver" onclick="openMenu('horse')">競走馬メニュー</button><button class="silver" onclick="go('breed')">生産・配合</button></div></div></div>${trainingSummary(h)}`}
-function legendCatalogue(){
- const p=state.progress,eligible=studs.filter(h=>legendEligible(h)&&unlocked(h));
- facilityView('legend','レジェンドカタログ',eligible.length?`<div class="legend-grid">${eligible.map(h=>`<article>${cardBadge(h)}<h3>${esc(h.name)}</h3>${horseArt({...h,color:h.color||'#9f6b49'})}<p>覚醒 ${p.awake[h.id]||0}/4 · ${esc(h.source?.[5]||'追い風')}</p>${p.legends[h.id]?`<button ${(p.legendReady[h.id]||0)>state.clock?'disabled':''} onclick="selectLegend('${h.id}')">${(p.legendReady[h.id]||0)>state.clock?'待機 '+(p.legendReady[h.id]-state.clock)+'週':'配合相手を選ぶ'}</button>`:`<button ${p.awake[h.id]===4&&(p.legendOrbs||0)>=1?'':'disabled'} onclick="unlockLegend('${h.id}');legendCatalogue()">伝説の宝玉で解放</button>`}</article>`).join('')}</div>`:'<p>対象の株券を入手して覚醒4にすると、レジェンドカードを解放できます。</p>')
-}
+function legendCatalogue(page=0){return legendCatalogueView(page)}
 function selectLegend(id){
  const h=studs.find(v=>v.id===id);if(!h||!state.progress.legends[id])return;
  if(h.sex==='牝')breedM=id;else breedS=id;
@@ -852,7 +849,7 @@ if(k==='condition'&&h.debutDone)body+=`<p class="muted">調教パートナー：
 if(k==='center'&&!h.centerJob)body='<p>基本メニューはセレブランク シルバー2で開放。シルバー10特訓は各馬合計3回まで。</p>'+body;
 if(k==='detail'&&!h.debutDone&&!h.legendOrigin)body='<p class="notice">能力は条件戦3戦終了後に少しずつ判明します。</p>'+body;if(k==='detail')body+=`<p>${esc(h.whiteMark||'白斑なし')} · 特性 ${esc(h.trait||'なし')}${h.traitEvolved?'（進化）':''}</p>`;
 if(k==='race'){const rights=invitationBalance(h);body='<p class="notice">出走権　WBC '+rights.wbc+'回 ／ SWBC '+rights.swbc+'回　·　WBCは種目ごとに数週おきに開催、SWBCは毎週開催</p>'+body}
-if(k==='detail'&&h.bredHere)body+='<button onclick="playGrowth(current())">成長シーンを見直す</button>';
+if(k==='detail'&&h.bredHere)body+='<button onclick="playGrowth(current())">成長シーンを見直す</button>';if(k==='detail')body+='<button onclick="readingDialog()">実況用の読み</button>';
 if(k==='history'&&h.conditionResults.length)body+='<h3>入厩前の条件戦</h3>'+debutHistory(h);
 if(k==='condition'&&!h.debutDone){const race=conditionRace(h);body+='<h3>次走予定　'+esc(race.name)+'</h3><p>'+race.apt+' '+race.distance+'m</p>'+entryForecast(h,race)}
 if(k==='pedigree')body=`<p class="lineage-badge">系統：<b>${esc(crossLineage(h)||'系統未登録')}</b></p>`+pedigreeChart(h.ancestry)+familyTree(h.id);
@@ -1066,8 +1063,8 @@ function bank(list,id,side){
 }
 function parentPicker(horses,horse,role,side){
  const tab=parentTabs[side],level=state.progress.awake[horse.id]||0;
- const panel=tab===0?`<div class="parent-photo card-model33" role="img" aria-label="${esc(horse.name)}">${horseFigure(horse)}</div>`:tab===1?`<dl><dt>距離</dt><dd>${horse.distance}m</dd><dt>馬場</dt><dd>${horse.apt}</dd><dt>覚醒</dt><dd>${level} / 4</dd></dl>`:`<div class="parent-tree">${[0,1,2].map((i)=>`<p>${i===0?'本馬':i+'代前'}　${(horse.ancestry[i]||[]).filter(Boolean).map(esc).join(' ／ ')||'未登録'}</p>`).join('')}</div>`;
- return `<div class="compare-card ${side} frame-${cardRank(horse)}"><header><small>${role}</small><strong>${esc(horse.name)}</strong>${cardBadge(horse)}</header><div class="compare-art">${panel}</div><div class="compare-tabs">${['ビジュアル','パラメータ','血統表'].map((n,i)=>`<button aria-pressed="${i===tab}" onclick="parentTabs.${side}=${i};render()">${n}</button>`).join('')}</div><button class="parent-search" onclick="parentBrowser('${side}')">候補を検索</button><select aria-label="${role}" onchange="${side}=this.value;render()">${horses.map(v=>`<option value="${v.id}" ${horse.id===v.id?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div>`;
+ const panel=tab===0?`<div class="parent-photo card-model33" role="img" aria-label="${esc(horse.name)}">${horseFigure(horse)}</div>`:tab===1?parentParams(horse,level):`<div class="parent-tree">${[0,1,2].map((i)=>`<p>${i===0?'本馬':i+'代前'}　${(horse.ancestry[i]||[]).filter(Boolean).map(esc).join(' ／ ')||'未登録'}</p>`).join('')}</div>`;
+ return `<div class="compare-card ${side} frame-${cardRank(horse)}"><header><small>${role}</small><strong>${esc(horse.name)}</strong>${cardBadge(horse)}</header><div class="compare-art">${panel}</div><div class="compare-tabs">${['ビジュアル','パラメータ','血統表'].map((n,i)=>`<button aria-pressed="${i===tab}" onclick="parentTabs.${side}=${i};render()">${n}</button>`).join('')}</div>${chargeGauge(horse.id)}<button class="parent-search" onclick="parentBrowser('${side}')">候補を検索</button><select aria-label="${role}" onchange="${side}=this.value;render()">${horses.map(v=>`<option value="${v.id}" ${horse.id===v.id?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div>`;
 }
 function breed(){
   const allSires=parents('牡'),allDams=parents('牝');
@@ -1093,18 +1090,18 @@ function breed(){
       <button aria-pressed="${!legend}" onclick="breedMode='normal';render()">通常生産 · ${breedCost(sire,dam)}枚</button>
       <button aria-pressed="${legend}" onclick="breedMode='legend';render()">レジェンド生産</button>
     </div>
-    <div class="source-bar">${lineupTabs('breedS','父候補')}${lineupTabs('breedM','母候補')}<label>母馬の継承型<select onchange="state.matingFilter=this.value;render()">${['すべて','堅実型','爆発型','一発型'].map(k=>`<option ${type===k?'selected':''}>${k}</option>`).join('')}</select></label></div><div class="breed-stage"><div class="pair-layout">${bank(sires,sire.id,'breedS')}<div class="breed-duo">${parentPicker(sires,sire,'種牡馬','breedS')}
+    <div class="source-bar">${lineupTabs('breedS','父候補')}${lineupTabs('breedM','母候補')}<label>母馬の継承型<select onchange="state.matingFilter=this.value;render()">${['すべて','堅実型','平均型','爆発型','一発型'].map(k=>`<option ${type===k?'selected':''}>${k}</option>`).join('')}</select></label></div><div class="breed-stage"><div class="pair-layout">${bank(sires,sire.id,'breedS')}<div class="breed-duo">${parentPicker(sires,sire,'種牡馬','breedS')}
       <span class="pair-times" aria-label="継承型">${inheritType(sire,dam)}</span>
       ${compatible.length?parentPicker(compatible,dam,'繁殖牝馬','breedM'):'<p>この継承型に合う母馬はいません。</p>'}</div>${bank(compatible,dam.id,'breedM')}</div>
     <div class="match-report"><span class="staff-image portrait${state.secretary||0}" aria-hidden="true"></span><h3>配合診断 · ${inheritType(sire,dam)}</h3>
       <p class="sec-bubble">${secMateComment(sire,dam,t)}</p>
       ${pairingSummary(sire,dam,t)}<div>${t.tags.map(v=>`<span class="tag">${esc(v)}</span>`).join(' ')}</div>
-      <p>${t.reference?'資料上の再現馬 '+esc(t.reference)+'　':''}${t.common.map(v=>`${esc(v.n)} ${(v.father||[v.i]).join('+')}×${(v.mother||[v.j]).join('+')}（${v.blood?.toFixed(2)||'0'}％）`).join('、')||'登録血統に共通祖先なし'}</p>
+      <p class="theory-main">発生する主な配合理論　<b>${esc(theoryHeadline(t))}</b></p><p>${t.reference?'資料上の再現馬 '+esc(t.reference)+'　':''}${t.common.map(v=>`${esc(v.n)} ${(v.father||[v.i]).join('+')}×${(v.mother||[v.j]).join('+')}（${v.blood?.toFixed(2)||'0'}％）`).join('、')||'登録血統に共通祖先なし'}</p>
       ${legend?`<p class="legend-status">${eligible?'レジェンド生産可能 · 初期素質に配合理論ボーナス / 成長上限 +8':'解放済み・待機終了のレジェンドカードと、SR以上・覚醒4の株券または引退したレジェンド産駒が必要です。'}</p>`:''}
     </div>
-    <div class="breed-confirm"><label for="foalName">新馬の名前（任意）<input id="foalName" maxlength="18" value="${esc(foalDraft)}" oninput="foalDraft=this.value"></label>
-      ${!legend&&(sire.trait||dam.trait)?`<label>特性継承率を上げる株券<select id="traitMat"><option value="">使わない</option>${studs.filter(v=>state.progress.cards[v.id]>=2).map(v=>`<option value="${v.id}">${esc(v.name)} · 継承率＋25ポイント</option>`).join('')}</select></label>`:''}<label>生産のお守り<select id="birthCharm"><option value="">使用しない</option>${Object.entries(charmTypes).map(([k,[n,e]])=>`<option value="${k}" ${state.progress.inventory[k]?'':'disabled'}>${n} · ${e}（${state.progress.inventory[k]}個）</option>`).join('')}</select></label>
-      <button class="gold" onclick="reviewProduction()">競走馬を生産する</button></div></div>    <details class="breed-pedigree"><summary>5代血統表を確認</summary><button onclick="showPairTree()">父母を並べて拡大</button>
+    <div class="breed-confirm">${!legend?`<p class="trait-rate">特性継承率 <b>${traitRate(sire,dam).toFixed(1)}%</b>　特性進化率 <b>${['―','小','中'][(sire.trait?1:0)+(dam.trait?1:0)]}</b></p>`:''}
+      ${!legend&&(sire.trait||dam.trait)?`<label>特性継承率を上げる株券<select id="traitMat"><option value="">使わない</option>${studs.filter(v=>state.progress.cards[v.id]>=2).map(v=>`<option value="${v.id}">${esc(v.name)} · 継承率＋25ポイント</option>`).join('')}</select></label>`:''}<input type="hidden" id="birthCharm" value="${esc(charmPick||'')}"><button class="charm-button" onclick="charmScreen()">${charmPick&&charmTypes[charmPick]?'お守り：'+esc(charmTypes[charmPick][0]):'お守りを使用する'}</button>
+      <button class="gold" onclick="reviewProduction()" ${chargeOf(sire.id)<CHARGE_COST||chargeOf(dam.id)<CHARGE_COST?'disabled':''}>競走馬を生産する</button>${chargeOf(sire.id)<CHARGE_COST||chargeOf(dam.id)<CHARGE_COST?'<p class="muted">生産チャージが足りません（週送りで回復）</p>':''}</div></div>    <details class="breed-pedigree"><summary>5代血統表を確認</summary><button onclick="showPairTree()">父母を並べて拡大</button>
       <div class="tablewrap"><table><thead><tr><th>世代</th><th>父系</th><th>母系</th></tr></thead><tbody>
       ${Array.from({length:5},(_,i)=>`<tr><th>${i+1}代</th><td>${(sire.ancestry[i]||[]).map(n=>esc(n||'不明')).join(' / ')||'未登録'}</td><td>${(dam.ancestry[i]||[]).map(n=>esc(n||'不明')).join(' / ')||'未登録'}</td></tr>`).join('')}
       </tbody></table></div>
@@ -1115,7 +1112,7 @@ function breed(){
 function stallCount(){return Math.max(state.horses.length,Number.isSafeInteger(state.stallExpansion)?state.stallExpansion:0,Math.min(4,2+Math.floor(ownerRank()/3)))}
 function normalProductionMode(){closeMenu();breedMode='normal';render()}
 function reviewProduction(commit=false){
- if(state.tab!=='breed'||locked||weekInProgress||!$('foalName'))return;
+ if(state.tab!=='breed'||locked||weekInProgress||!document.querySelector('.breed-desk'))return;
  const a=parents('牡').find(h=>h.id===breedS),b=parents('牝').find(h=>h.id===breedM);
  const legend=breedMode==='legend',cost=a&&b&&!legend?breedCost(a,b):0;
  const type=state.matingFilter||'すべて';
@@ -1134,14 +1131,14 @@ function reviewProduction(commit=false){
    const theoryMain=t2.reference?'再現配合':(t2.tags.find(x=>['奇跡の血量（3×4）','インブリード','スペシャルニックス','アウトブリード'].includes(x))||t2.tags[0]||'―');
    const theorySub=t2.reference?t2.reference:(mb?`${mb.n} ${(mb.blood||0).toFixed(2)}％`:'');
    const evoGrade=['―','小','中'][(a.trait?1:0)+(b.trait?1:0)];
-   const charmSel=$('birthCharm'),charmName=charmSel&&charmSel.value?charmSel.options[charmSel.selectedIndex].textContent.split(' · ')[0]:'';
-   facilityView('confirmBreed',legend?'レジェンド生産':'配合を確認',`<div class="confirm-pair${legend?' legend':''}">${legend?'<p class="confirm-legend-head">レジェンドカードを使用して、競走馬を生産</p>':''}<div class="confirm-cards"><div class="confirm-card"><small>種牡馬</small><b>${esc(a.name)}</b><span class="confirm-trait ${a.trait?'has':''}">${a.trait?esc(a.trait):'―――'}</span></div><div class="confirm-heart"><span class="heart">♥</span><b>${inheritType(a,b)}</b><span class="evo">特性進化率 ${evoGrade}</span></div><div class="confirm-card"><small>繁殖牝馬</small><b>${esc(b.name)}</b><span class="confirm-trait ${b.trait?'has':''}">${b.trait?esc(b.trait):'―――'}</span></div></div><div class="confirm-theory"><small>発生する主な配合理論</small><b>${esc(theoryMain)}${theorySub?`　${esc(theorySub)}`:''}</b></div><p>${legend?'レジェンド生産':'通常生産'}　消費メダル ${cost}枚${charmName?`　／　お守り：${esc(charmName)}を使用`:''}</p>${full?'<p>満室のため、馬房を1つ無料で追加します。</p>':''}<button class="gold confirm-produce" onclick="reviewProduction(true)">生産する</button></div>`,'選び直す');return
+   const charmName=charmPick&&charmTypes[charmPick]?charmTypes[charmPick][0]:'';if(chargeOf(a.id)<CHARGE_COST||chargeOf(b.id)<CHARGE_COST){facilityView('pairHelp','生産チャージ不足','<p>親の生産チャージが足りません。週送りで回復します。</p>');return}
+   facilityView('confirmBreed',legend?'レジェンド生産':'配合を確認',`<div class="confirm-pair${legend?' legend':''}">${legend?'<p class="confirm-legend-head">レジェンドカードを使用して、競走馬を生産</p>':''}<div class="confirm-cards"><div class="confirm-card"><small>種牡馬</small><b>${esc(a.name)}</b><span class="confirm-trait ${a.trait?'has':''}">${a.trait?esc(a.trait):'―――'}</span>${legend?`<span class="trait-rate">特性＆継承率 <b>100.0%</b></span>`:`<span class="trait-rate">特性継承率 <b>${traitRate(a,b).toFixed(1)}%</b></span>`}${chargeGauge(a.id)}</div><div class="confirm-heart"><span class="heart">♥</span><b>${inheritType(a,b)}</b><span class="evo">特性進化率 ${evoGrade}</span></div><div class="confirm-card"><small>繁殖牝馬</small><b>${esc(b.name)}</b><span class="confirm-trait ${b.trait?'has':''}">${b.trait?esc(b.trait):'―――'}</span>${chargeGauge(b.id)}</div></div><div class="confirm-theory"><small>発生する主な配合理論</small><b>${esc(theoryHeadline(t2))}</b></div><p>${legend?'レジェンド生産':'通常生産'}　消費メダル ${cost}枚${!legend?`（通常 120枚＋配合理論ボーナス ${Math.max(0,cost-120)}枚）`:''}${charmName?`　／　お守り：${esc(charmName)}を使用`:''}</p>${full?'<p>満室のため、馬房を1つ無料で追加します。</p>':''}<button class="gold confirm-produce" onclick="reviewProduction(true)">生産する</button></div>`,'選び直す');return
  }
  if(!$('menuDialog').open||$('menuDialog').dataset.view!=='confirmBreed')return;
  closeMenu();if(full)state.stallExpansion=stallCount()+1;
  produce(a,b,cost);
 }
-function produce(a,b,cost){let name=$('foalName').value.trim()||(fixedPairs.has(a.name+'|'+b.name)?pick(fixedPairs.get(a.name+'|'+b.name)):'')||pick(['アステル','ノース','グラン','シルク','ルミナス'])+pick(['クラウン','スター','ウィンド','ベル','ロード']);if(!a||!b)return;
+function produce(a,b,cost){useCharge(a.id);useCharge(b.id);let name=(fixedPairs.has(a.name+'|'+b.name)?pick(fixedPairs.get(a.name+'|'+b.name)):'')||pick(['アステル','ノース','グラン','シルク','ルミナス'])+pick(['クラウン','スター','ウィンド','ベル','ロード']);if(!a||!b)return;
 const legend=breedMode==='legend';
 if(legend&&!legendPair(a,b))return;
 let h=foal(a,b,name);const evo0=!!h.traitEvolved;h.bornYear=state.yearStart+Math.floor(state.clock/52);h.earnings=0;state.medals-=cost;h.whiteMark=h.look[1]>=160?'流星':h.look[1]>=64?'星':'なし';h.health=round(rand(45,85));h.travel=round(rand(40,80));h.mud=round(rand(40,80));
@@ -1165,7 +1162,7 @@ for(const match of theory(a,b).common){
  else if(effect==='体質')h.health=clamp(h.health+3);
  else if(effect==='芝適性'&&h.apt!=='芝'||effect==='ダート適性'&&h.apt!=='ダート')h.dualSurface=true;
  }}
-h.parentIds=[a.id,b.id];h.bredHere=true;const charm=$('birthCharm').value;
+h.parentIds=[a.id,b.id];h.bredHere=true;const charm=charmPick||'';charmPick='';
 if(charm&&state.progress.inventory[charm]>0){
  state.progress.inventory[charm]--;
  if(charm==='turf'||charm==='sand'){const apt=charm==='turf'?'芝':'ダート';if(h.apt!==apt)h.dualSurface=true}
@@ -1238,7 +1235,7 @@ function playGrowth(h,replay=true){
  document.body.appendChild(d);d.showModal();advance()
 }
 
-function nameFoal(h){sfx('great');secVoice(secBirth[state.secretary||0]||'');const coat=(lookLabel(h).split(' ／ ')[0]||'');const sexWord=h.sex==='牡'?'男の子':h.sex==='牝'?'女の子':'仔';const imp=h.stats.temper>=70?(h.sex==='牝'?'かなりおてんばな':'かなりヤンチャな'):h.stats.temper>=40?'元気な':'おっとりした';const qImp=h.quality>=91?'なかなかの素質を感じさせています。':h.quality>=76?'良い雰囲気を持った馬なので、将来が楽しみです。':'これからの成長が楽しみです。';const comment=`${imp}${coat}の${sexWord}ですよ。${qImp}`;const d=document.createElement('dialog');d.className='birth foaling';d.dataset.aura=h.quality>=94?'rainbow':h.quality>=80?'gold':h.quality>=65?'silver':'normal';d.innerHTML=`<div class="birth-scene individual-birth"><div class="birth-topbar"><span class="birth-parents">父：${esc(h.parents[0])}　母：${esc(h.parents[1])}</span><span class="birth-sex s-${h.sex}">${h.sex}</span></div>${horseFigure(h,'foal')}<span class="birth-gen">仔馬誕生　／　第${h.gen}世代</span><h2>${esc(h.name)}</h2></div><p class="birth-bubble"><span class="staff-image portrait${state.secretary||0}"></span><span class="bubble-body">${secretaries[state.secretary||0]}「${comment}」</span></p><label>馬名を入力してください<input id="birthName" maxlength="18" value="${esc(h.name)}"></label><div class="birth-name-tools"><button type="button" onclick="autoFoalName()">オート馬名</button><button type="button" onclick="toggleBirthTree(this)">血統表</button></div><div class="birth-tree" hidden>${[0,1,2,3,4,5].map(g=>`<p>${g===0?'本馬':g+'代前'}　${(h.ancestry[g]||[]).filter(Boolean).map(esc).join(' ／ ')||'未登録'}</p>`).join('')}</div><details class="birth-voice"><summary>実況用の設定（任意）</summary><label>実況用の読み<input id="birthReading" maxlength="32"></label><label>アクセント位置<input id="birthAccent" type="number" min="0" max="32" value="0"></label><button type="button" onclick="readName()">試聴</button><small id="voiceHint" role="status"></small></details><p>${h.theories.map(x=>`<span class="tag">${esc(x)}</span>`).join('')}</p><label>誕生後の行き先<select id="foalLocation"><option value="stable">入厩準備・条件戦へ</option><option value="pasture">放牧</option></select></label><button class="gold birth-decide" style="width:100%;margin-top:12px">決定する</button>`;d.addEventListener('cancel',event=>event.preventDefault());d.querySelector('button.gold').onclick=()=>{h.reading=$('birthReading').value.trim();h.accent=Number($('birthAccent').value);h.name=$('birthName').value.trim()||h.name;h.namingPending=false;h.ancestry[0]=[h.name];const resting=$('foalLocation').value==='pasture';if(resting){h.location='pasture';h.pastureWeeks=0}d.close();render();if(!resting)openMenu('condition')};d.addEventListener('close',()=>d.remove());document.body.appendChild(d);d.showModal();}
+function nameFoal(h){sfx('great');secVoice(secBirth[state.secretary||0]||'');const coat=(lookLabel(h).split(' ／ ')[0]||'');const sexWord=h.sex==='牡'?'男の子':h.sex==='牝'?'女の子':'仔';const imp=h.stats.temper>=70?(h.sex==='牝'?'かなりおてんばな':'かなりヤンチャな'):h.stats.temper>=40?'元気な':'おっとりした';const qImp=h.quality>=91?'なかなかの素質を感じさせています。':h.quality>=76?'良い雰囲気を持った馬なので、将来が楽しみです。':'これからの成長が楽しみです。';const comment=`${imp}${coat}の${sexWord}ですよ。${qImp}`;const d=document.createElement('dialog');d.className='birth foaling';d.dataset.aura=h.quality>=94?'rainbow':h.quality>=80?'gold':h.quality>=65?'silver':'normal';d.innerHTML=`<div class="birth-scene individual-birth"><div class="birth-topbar"><span class="birth-parents">父：${esc(h.parents[0])}　母：${esc(h.parents[1])}</span><span class="birth-sex s-${h.sex}">${h.sex}</span></div>${horseFigure(h,'foal')}<span class="birth-gen">仔馬誕生　／　第${h.gen}世代</span><h2>${esc(h.name)}</h2></div><p class="birth-bubble"><span class="staff-image portrait${state.secretary||0}"></span><span class="bubble-body">${secretaries[state.secretary||0]}「${comment}」</span></p><label>馬名を入力してください<input id="birthName" maxlength="18" value="${esc(h.name)}"></label><div class="birth-name-tools"><button type="button" class="kanmuri-toggle" aria-pressed="${!!state.kanmuriOn}" onclick="toggleKanmuri(this)">冠名 ${state.kanmuriOn?'ON':'OFF'}</button><button type="button" onclick="autoFoalName()">オート馬名</button><button type="button" onclick="toggleBirthTree(this)">血統表</button></div><div class="birth-tree" hidden>${[0,1,2,3,4,5].map(g=>`<p>${g===0?'本馬':g+'代前'}　${(h.ancestry[g]||[]).filter(Boolean).map(esc).join(' ／ ')||'未登録'}</p>`).join('')}</div><p>${h.theories.map(x=>`<span class="tag">${esc(x)}</span>`).join('')}</p><button class="gold birth-decide" style="width:100%;margin-top:12px">決定する</button>`;d.addEventListener('cancel',event=>event.preventDefault());d.querySelector('button.gold').onclick=()=>{let nm=$('birthName').value.trim()||h.name;if(state.kanmuriOn&&state.kanmuri&&!nm.startsWith(state.kanmuri))nm=(state.kanmuri+nm).slice(0,18);h.name=nm;h.namingPending=false;h.ancestry[0]=[h.name];d.close();render();openMenu('condition')};d.addEventListener('close',()=>d.remove());document.body.appendChild(d);d.showModal();}
 function retire(h){h.retired=true;h.quality=clamp(h.quality+Math.min(9,h.training*.13+wins(h)*.45),0,120);state.retired.push(h);state.horses=state.horses.filter(v=>v.id!==h.id);state.selected=state.horses[0]?.id||null;log(`${h.name}が繁殖入りしました`);if(h.earnings>=3000)log(`${h.name}が殿堂入りし、プレミアカップに自動エントリーされました`);render()}
 function studbook(){
  const all=allHorses(),year=state.yearStart+Math.floor(state.clock/52);
@@ -1437,9 +1434,10 @@ function unlocked(h){return Boolean(state.progress.cards[h.id])}
 function cardBadge(h){
   const tier=cardRank(h);
   return tier===undefined?'<span class="card-tier">自家繁殖</span>':
-    `<span class="card-tier tier-${tier}">${h.source?.[7]||rarity[tier]}</span>`;
+    `<span class="card-tier tier-${tier}">${displayRarity(h)}</span>`;
 }
-function stockView(id){
+function stockView(id){return stockDetail(id)}
+function stockViewOld(id){
  $('menuDialog').dataset.view='stock';
  const h=studs.find(v=>v.id===id);if(!h)return;const x=h.source||[],a=state.progress.awake[id]||0;
  $('menuContent').innerHTML=`<button onclick="homeInfo('collection')">図鑑へ戻る</button><h2>${esc(h.name)}</h2>${cardBadge(h)}${h.modern?'<p>近年の活躍馬　'+esc(x[6])+'</p>':''}<p>${esc(h.sex)} / ${esc(h.line)} / 覚醒 ${a} / 4</p>
@@ -1459,24 +1457,11 @@ function filterCollection(){
  const q=$('stockQuery').value.trim(),owned=$('ownedOnly').checked;
  document.querySelectorAll('[data-stock-id]').forEach(el=>{const h=studs.find(v=>v.id===el.dataset.stockId);el.style.display=(!tier||String(cardRank(h))===tier)&&(!type||(type==='legend'?state.progress.legends[h.id]:type==='partner'?['SSP','UP'].includes(h.source?.[7]):h.sex===type||h.sex==='牡・牝'))&&(!owned||unlocked(h))&&(!q||[h.name,h.line,...(h.source||[]).slice(0,6)].some(v=>v?.includes(q)))?'':'none'})
 }
-function collectionPanel(){
-  const progress=state.progress;
-  return `<div class="breed-toolbar"><button onclick="closeMenu();homeInfo('gacha')">株券ガチャ</button>
-    <button onclick="closeMenu();go('breed')">生産へ</button></div>
-    <div class="row"><label>株券を検索<input id="stockQuery" oninput="filterCollection()" placeholder="名前・系統・脚質"></label><label>レアリティ<select id="cardTier" onchange="filterCollection()"><option value="">すべて</option>${rarity.map((v,i)=>`<option value="${i}">${v}</option>`).join('')}</select></label><label>用途<select id="cardUse" onchange="filterCollection()"><option value="">すべて</option><option value="牡">種牡馬</option><option value="牝">繁殖牝馬</option><option value="partner">調教専用</option><option value="legend">解放済みレジェンド</option></select></label><label><input id="ownedOnly" type="checkbox" onchange="filterCollection()">所持株券のみ</label></div><p class="notice">待機短縮素材 <select id="waitMaterial">${studs.filter(v=>progress.cards[v.id]>1).map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('')}</select>　収集 ${studs.filter(unlocked).length} / ${studs.length}種類。 同じ株券を1枚使うごとに1段階覚醒します。対象株券は覚醒4と馬封石1個でレジェンド解放。所持馬封石 ${progress.gems}個。</p>`+
-    studs.map(h=>{
-      const level=progress.awake[h.id]||0;
-      const count=progress.cards[h.id]||0;
-      return `<div class="race" data-stock-id="${h.id}"><div>${cardBadge(h)} <button onclick="stockView('${h.id}')">${esc(h.name)}</button>
-        <small>　${h.sex} / ${h.apt} / 覚醒 ${level}/4 / 重複 ${Math.max(0,count-1)}枚</small></div>
-        ${level===4&&legendEligible(h)?`<button onclick="unlockLegend('${h.id}')" ${progress.legends[h.id]||!(progress.legendOrbs||0)?'disabled':''}>${progress.legends[h.id]?'解放済 · 待機'+Math.max(0,(progress.legendReady[h.id]||0)-state.clock)+'週':'馬封石で解放'}</button>`:''}
-        ${progress.legendReady[h.id]>state.clock?`<button onclick="cutWait('${h.id}')">待機を短縮</button>`:''}<button onclick="awaken('${h.id}')" ${level>=4||count<2?'disabled':''}>${level>=4?'最大覚醒':count?'覚醒':'未所持'}</button></div>`;
-    }).join('');
-}
+function collectionPanel(){return collectionGrid()}
 function poolCards(){return studs.filter(c=>drawPool==='all'||c.sex===(drawPool==='sire'?'牡':'牝'))}
 function poolWeights(cards){const w=drawWeights.map((n,i)=>cards.some(c=>cardRank(c)===i)?n:0),sum=w.reduce((a,b)=>a+b,0);return w.map(n=>100*n/sum)}
 function gachaPanel(){
-  const weights=poolWeights(poolCards());const odds=rarity.map((tier,i)=>`${tier} ${Number(weights[i].toFixed(2))}%`).join(' ／ ');
+  const weights=poolWeights(poolCards());const oddsMap={};['N','R','SR','SR','SSR','UR'].forEach((t,i)=>oddsMap[t]=(oddsMap[t]||0)+weights[i]);const odds=Object.entries(oddsMap).filter(([,v])=>v>0).map(([t,v])=>`${t} ${Number(v.toFixed(2))}%`).join(' ／ ');
   return `<div class="draw-tabs">${[['all','全株券ガチャ'],['sire','牡馬ガチャ'],['dam','牝馬ガチャ']].map(([id,n])=>`<button aria-pressed="${drawPool===id}" onclick="if(drawPool!=='${id}'){lastDraw=null;drawPool='${id}';refreshFeature('gacha')}">${n}</button>`).join('')}</div><div class="gacha-display"><h3>${drawPool==='all'?'名馬株券':drawPool==='sire'?'牡馬ガチャ · 種牡馬株券限定':'牝馬ガチャ · 繁殖牝馬株券限定'}</h3>
     <p>ガチャチケット <strong>${state.progress.tickets}枚</strong></p>
     ${lastDraw?`<div class="draw-result" role="status">${horseArt({...lastDraw.horse,color:lastDraw.horse.color||'#966044'})}${cardBadge(lastDraw.horse)} <b>${esc(lastDraw.horse.name)}</b>
@@ -1490,7 +1475,9 @@ function gachaPanel(){
   <section class="daily-draw"><h3>デイリーガチャ</h3><button onclick="dailyDraw()" ${state.progress.drawDay===localDay()?'disabled':''}>今日の無料ガチャ</button><p>${state.progress.dailyDrawResult?.day===localDay()?esc(state.progress.dailyDrawResult.name)+'を獲得':''}</p></section><button onclick="closeMenu();homeInfo('collection')">株券図鑑へ</button>`;
 }
 function drawCard(count=1){
- if(locked||!$('menuDialog').open||$('menuDialog').dataset.view!=='gacha'||![1,10].includes(count)||state.progress.tickets<count)return; sfx('gacha');
+ if(locked||!$('menuDialog').open||$('menuDialog').dataset.view!=='gacha'||![1,10].includes(count)||state.progress.tickets<count)return;
+ if(cardHoldings()+count>cardCap()){gameNotice('株券の所持枠がいっぱいです。図鑑で売却するか、所持枠を拡張してください。');return}
+ sfx('gacha');
  const batch=[],candidates=poolCards(),weights=poolWeights(candidates);
  for(let i=0;i<count;i++){
   let roll=seeded()*100;
@@ -1545,8 +1532,8 @@ function awaken(id){
   const {awake,cards}=state.progress;
   if(!studs.some(h=>h.id===id)||(cards[id]||0)<2||(awake[id]||0)>=4)return;
   cards[id]--;
-  awake[id]=(awake[id]||0)+1;
-  refreshFeature('collection');
+  awake[id]=(awake[id]||0)+1;sfx('great');save();
+  if($('menuDialog').dataset.view!=='merge')refreshFeature('collection');
 }
 function quests(all){
   return [
@@ -2433,6 +2420,90 @@ function showRace(replay){
     raceFinale(replay,skipped);
   }
   requestAnimationFrame(frame);
+}
+
+/* ===== 第13弾：監査§4（生産・命名・レジェンド・株券）。生産の計算式は変更しない ===== */
+let charmPick='';
+const CHARGE_COST=34;
+function chargeOf(id){const c=state.progress.charge?.[id];if(!c)return 100;return Math.min(100,c.v+(state.clock-c.at)*12)}
+function useCharge(id){const p=state.progress;p.charge??={};p.charge[id]={v:Math.max(0,chargeOf(id)-CHARGE_COST),at:state.clock}}
+function chargeGauge(id){const v=chargeOf(id);return `<div class="charge-gauge" title="生産チャージ"><span>生産チャージ：${v>=100?'MAX':Math.floor(v)+'%'}</span><i style="width:${v}%"></i></div>`}
+function traitRate(a,b){const d=[a,b].find(v=>v.trait);if(!d)return 0;return Math.min(100,d.traitChance||25)}
+function theoryHeadline(t){
+ if(t.reference)return '再現配合　'+t.reference;
+ const kind=t.tags.find(x=>['奇跡の血量（3×4）','インブリード','スペシャルニックス','系統ニックス','アウトブリード','血統重複注意'].includes(x))||t.tags[0]||'―';
+ const mb=t.common.length?t.common.reduce((x,y)=>(y.blood||0)>(x.blood||0)?y:x):null;
+ return kind+(mb?'　'+mb.n+' '+(mb.blood||0).toFixed(2)+'%':'');
+}
+function parentParams(h,level){
+ const ranks=archivedRanks(h),q=h.quality||60,L=v=>v==null?letterRank(q):String(v);
+ const rows=[['距離適性',(h.distance-200)+'〜'+(h.distance+200)+'m'],['得意コース',favouriteCourse(h)],['成長',h.growth||'普通'],['芝・ダート',h.apt==='芝'?'芝◎ ／ ダート△':'芝△ ／ ダート◎'],['気性',L(ranks.temper)],['体質',letterRank(h.health||q)],['道悪',letterRank(h.mud||q-5)],['スタート',L(ranks.start)],['勝負根性',L(ranks.power)],['瞬発力',L(ranks.burst)],['覚醒',level+' / 4'],['レア特性',h.source?.[5]||h.trait||'―']];
+ return `<dl class="param-tab">${rows.map(([a,b])=>`<dt>${a}</dt><dd>${esc(b)}</dd>`).join('')}</dl>`;
+}
+function charmScreen(){
+ const inv=state.progress.inventory;
+ facilityView('charm','お守りを使用する',`<p class="muted">生産に使うお守りを1つ選びます。</p><div class="charm-grid"><button class="charm-cell ${!charmPick?'on':''}" onclick="charmPick='';closeMenu();render()"><b>使用しない</b></button>${Object.entries(charmTypes).map(([k,[n,e]])=>`<button class="charm-cell ${charmPick===k?'on':''}" ${inv[k]?'':'disabled'} onclick="charmPick='${k}';closeMenu();render()"><span>🧧</span><b>${esc(n)}</b><small>${esc(e)}</small><em>所持 ${inv[k]||0}</em></button>`).join('')}</div>`,'戻る');
+}
+function toggleKanmuri(btn){
+ if(!state.kanmuri){const v=(prompt('冠名を入力してください（例：クロニクル）')||'').trim().slice(0,8);if(!v)return;state.kanmuri=v}
+ state.kanmuriOn=!state.kanmuriOn;btn.setAttribute('aria-pressed',String(state.kanmuriOn));btn.textContent='冠名 '+(state.kanmuriOn?'ON（'+state.kanmuri+'）':'OFF');save();
+}
+// 実況用の読み・アクセントは命名後に詳細画面から設定する
+function readingDialog(){
+ const h=current();if(!h)return;
+ facilityView('reading','実況用の読み',`<label>実況用の読み<input id="birthReading" maxlength="32" value="${esc(h.reading||'')}"></label><label>アクセント位置<input id="birthAccent" type="number" min="0" max="32" value="${Number(h.accent)||0}"></label><button type="button" onclick="readName()">試聴</button><button class="gold" onclick="current().reading=$('birthReading').value.trim();current().accent=Number($('birthAccent').value)||0;save();openMenu('detail')">保存</button><small id="voiceHint" role="status"></small>`,'戻る');
+}
+function legendCatalogueView(page=0){
+ const p=state.progress,all=studs.filter(h=>legendEligible(h)),per=6,pages=Math.max(1,Math.ceil(all.length/per));page=Math.max(0,Math.min(pages-1,page));
+ const cards=all.slice(page*per,page*per+per).map(h=>{
+  const owned=unlocked(h),open=!!p.legends[h.id],wait=Math.max(0,(p.legendReady[h.id]||0)-state.clock);
+  const cond=open?(wait?'待機 あと'+wait+'週':'配合可能'):!owned?'株券を入手すると表示':p.awake[h.id]!==4?'覚醒4で解放可能（現在'+(p.awake[h.id]||0)+'）':(p.legendOrbs||0)<1?'伝説の宝玉が必要':'解放できます';
+  return `<article class="legend-card ${open?'open':'locked'}">${open||owned?horseArt({...h,color:h.color||'#9f6b49'}):'<div class="legend-silhouette"></div>'}${open?'':'<span class="lock-icon">🔒</span>'}<b>${owned?esc(h.name):'？？？'}</b>${cardBadge(h)}<small>${esc(cond)}</small>${open?`<button ${wait?'disabled':''} onclick="selectLegend('${h.id}')">配合相手を選ぶ</button>${wait?`<button onclick="shortenScreen('${h.id}')">待機を短縮</button>`:''}`:owned&&p.awake[h.id]===4&&(p.legendOrbs||0)>=1?`<button onclick="unlockLegend('${h.id}').then(()=>legendCatalogue(${page}))">伝説の宝玉で解放</button>`:''}</article>`}).join('');
+ facilityView('legend','LEGEND CATALOG',`<div class="legend-grid six">${cards||'<p>対象の株券がありません。</p>'}</div><div class="pager"><button ${page?'':'disabled'} onclick="legendCatalogue(${page-1})">◀</button><span>${page+1} / ${pages}</span><button ${page<pages-1?'':'disabled'} onclick="legendCatalogue(${page+1})">▶</button></div>`,'戻る');
+}
+let shortenPick={};
+function shortenValue(target,id){const m=studs.find(v=>v.id===id);return m?1+cardRank(m)+(m.line===target.line?2:0)+(id===target.id?3:0):0}
+function shortenScreen(id){
+ const p=state.progress,target=studs.find(v=>v.id===id);if(!target)return;
+ const mats=studs.filter(v=>(p.cards[v.id]||0)>=2);const wait=Math.max(0,(p.legendReady[id]||0)-state.clock);
+ const picked=Object.entries(shortenPick).filter(([,n])=>n>0),total=picked.reduce((t,[k,n])=>t+shortenValue(target,k)*n,0),count=picked.reduce((t,[,n])=>t+n,0);
+ facilityView('shorten','待機時間の短縮',`<p>${esc(target.name)}　残り待機 <b>${wait}週</b> → <b>${Math.max(0,wait-total)}週</b></p><p>選択個数 ${count}/100　合計短縮 ${total}週</p><div class="mat-grid">${mats.map(v=>`<button class="mat-cell ${(shortenPick[v.id]||0)?'on':''}" onclick="shortenPick['${v.id}']=Math.min((shortenPick['${v.id}']||0)+1,(state.progress.cards['${v.id}']||1)-1);shortenScreen('${id}')">${cardBadge(v)}<b>${esc(v.name)}</b><small>${shortenValue(target,v.id)}週 / 枚</small><em>${shortenPick[v.id]||0}/${(p.cards[v.id]||1)-1}</em></button>`).join('')||'<p>重複している株券がありません。</p>'}</div><div class="row"><button onclick="shortenPick={};shortenScreen('${id}')">クリア</button><button class="gold" ${count?'':'disabled'} onclick="applyShorten('${id}')">使用する</button></div>`,'戻る');
+}
+function applyShorten(id){
+ const p=state.progress,target=studs.find(v=>v.id===id);if(!target)return;let total=0;
+ for(const [k,n] of Object.entries(shortenPick)){const use=Math.min(n,(p.cards[k]||0)-1);if(use>0){p.cards[k]-=use;total+=shortenValue(target,k)*use}}
+ p.legendReady[id]=Math.max(state.clock,(p.legendReady[id]||0)-total);shortenPick={};save();legendCatalogue();
+}
+// 株券：表示レアリティ（原作体系 N/R/SR/SSR/UR/UP/SSP）。内部ランクは変えない
+function displayRarity(h){return h.source?.[7]||['N','R','SR','SR','SSR','UR'][cardRank(h)]||'N'}
+function cardHoldings(){return Object.values(state.progress.cards||{}).reduce((a,b)=>a+(b||0),0)}
+function cardCap(){const p=state.progress;p.cardCap??=Math.max(100,Math.ceil(cardHoldings()/10)*10);return p.cardCap}
+function cardLv(h){return Math.min(100,1+(state.progress.awake[h.id]||0)*25)}
+function awakeDots(n){return `<span class="awake-dots">${[0,1,2,3].map(i=>`<i class="${i<n?'on':''}"></i>`).join('')}</span>`}
+let collectionFilter={tier:'',use:'',owned:false,q:''};
+function collectionGrid(){
+ const p=state.progress,f=collectionFilter;
+ const list=studs.filter(h=>(!f.tier||displayRarity(h)===f.tier)&&(!f.owned||unlocked(h))&&(!f.q||(h.name+h.line+(h.source?.[3]||'')).includes(f.q))&&(!f.use||(f.use==='legend'?!!p.legends[h.id]:f.use==='partner'?!['牡','牝','牡・牝'].includes(h.sex):String(h.sex).includes(f.use))));
+ return `<div class="breed-toolbar"><button onclick="closeMenu();homeInfo('gacha')">株券ガチャ</button><button onclick="closeMenu();go('breed')">生産へ</button><span class="holdings">所持 ${cardHoldings()}/${cardCap()}</span><button onclick="expandCards()">所持枠拡張（馬封石5個）</button></div>
+ <div class="row"><label>検索<input value="${esc(f.q)}" onchange="collectionFilter.q=this.value;refreshFeature('collection')" placeholder="名前・系統・脚質"></label><label>レアリティ<select onchange="collectionFilter.tier=this.value;refreshFeature('collection')"><option value="">すべて</option>${['N','R','SR','SSR','SSP','UP','UR'].map(v=>`<option ${f.tier===v?'selected':''}>${v}</option>`).join('')}</select></label><label>用途<select onchange="collectionFilter.use=this.value;refreshFeature('collection')">${[['','すべて'],['牡','種牡馬'],['牝','繁殖牝馬'],['partner','調教専用'],['legend','解放済みレジェンド']].map(([v,n])=>`<option value="${v}" ${f.use===v?'selected':''}>${n}</option>`).join('')}</select></label><label><input type="checkbox" ${f.owned?'checked':''} onchange="collectionFilter.owned=this.checked;refreshFeature('collection')">所持のみ</label></div>
+ <p class="muted">収集 ${studs.filter(unlocked).length} / ${studs.length}種類　カードをタップすると詳細・合成・売却ができます。</p>
+ <div class="stock-grid">${list.map(h=>`<button class="stock-cell ${unlocked(h)?'':'none'} r-${displayRarity(h)}" onclick="stockView('${h.id}')"><span class="r-label">${displayRarity(h)}</span>${awakeDots(p.awake[h.id]||0)}<b>${esc(h.name)}</b><small>${esc(h.sex)}・${esc(h.apt)}</small><em>×${p.cards[h.id]||0}</em></button>`).join('')}</div>`;
+}
+async function expandCards(){const p=state.progress;if((p.gems||0)<5||!await askOwner('馬封石5個で所持枠を10拡張しますか？'))return;p.gems-=5;p.cardCap=cardCap()+10;save();refreshFeature('collection')}
+function stockDetail(id){
+ const h=studs.find(v=>v.id===id);if(!h)return;const p=state.progress,x=h.source||[],a=p.awake[id]||0,owned=unlocked(h);
+ const breedable=['牡','牝','牡・牝'].includes(h.sex);
+ facilityView('stock',h.name,`<div class="stock-detail"><div class="stock-card r-${displayRarity(h)}">${horseArt({...h,color:h.color||'#9f6b49'})}<span class="r-label">${displayRarity(h)}</span><b>${esc(h.name)}</b>${awakeDots(a)}<small>Lv.${cardLv(h)} / 100</small></div>
+ <div><div class="stock-actions"><button ${owned&&breedable?'':'disabled'} onclick="stockToBreed('${id}')">生産</button><button ${owned&&ownerRank()>=3&&current()&&!partnerLocked(current())?'':'disabled'} onclick="assignPartner('${id}');gameNotice('${esc(h.name)}を調教パートナーに設定しました。')">調教</button><button onclick="this.closest('.stock-detail').querySelector('.stock-tree').hidden^=1">血統</button><button ${owned?'':'disabled'} onclick="mergeScreen('${id}')">合成</button><button ${(p.cards[id]||0)>=2?'':'disabled'} onclick="sellCard('${id}')">売却</button></div>
+ <dl class="param-tab"><dt>性別</dt><dd>${esc(h.sex)}</dd><dt>系統</dt><dd>${esc(h.line)}</dd><dt>距離</dt><dd>${h.distance}m</dd><dt>馬場</dt><dd>${esc(h.apt)}</dd><dt>所持</dt><dd>${p.cards[id]||0}枚</dd><dt>生産チャージ</dt><dd>${chargeOf(id)>=100?'MAX':Math.floor(chargeOf(id))+'%'}</dd><dt>特殊脚質</dt><dd>${esc(x[3]||'―')}</dd><dt>シリーズスキル</dt><dd>${esc(x[4]||'―')}</dd><dt>レジェンド特性</dt><dd>${esc(x[5]||'―')}</dd><dt>P調教</dt><dd>${Object.entries(partnerEffects(h,a)).map(([k,v])=>statNames[k]+'＋'+v).join(' ／ ')}（${[1,2,3].map(n=>partnerFee(h,n)).join('/')}枚）</dd></dl>
+ <div class="stock-tree" hidden>${Array.from({length:5},(_,i)=>`<p>${i+1}代　${(h.ancestry[i+1]||[]).map(esc).join(' ／ ')||'未登録'}</p>`).join('')}</div></div></div><button onclick="homeInfo('collection')">図鑑へ戻る</button>`,'閉じる');
+}
+function stockToBreed(id){const h=studs.find(v=>v.id===id);if(!h)return;closeMenu();state.tab='breed';breedMode='normal';if(h.sex==='牝')breedM=id;else breedS=id;render()}
+const SELL_PRICE={N:50,R:100,SR:200,SSR:500,SSP:800,UP:1000,UR:1000};
+async function sellCard(id){const h=studs.find(v=>v.id===id),p=state.progress;if(!h||(p.cards[id]||0)<2)return;const price=SELL_PRICE[displayRarity(h)]||100;if(!await askOwner(h.name+'の重複株券を1枚、メダル'+price+'枚で売却しますか？'))return;p.cards[id]--;state.medals+=price;sfx('coin');save();stockView(id)}
+function mergeScreen(id){
+ const h=studs.find(v=>v.id===id),p=state.progress;if(!h)return;const a=p.awake[id]||0,dup=Math.max(0,(p.cards[id]||0)-1);
+ facilityView('merge','合成',`<div class="merge-view"><div class="stock-card r-${displayRarity(h)}"><span class="r-label">${displayRarity(h)}</span><b>${esc(h.name)}</b>${awakeDots(a)}<small>Lv.${cardLv(h)} → <b>${Math.min(100,cardLv(h)+(a<4?25:0))}</b></small><small>覚醒 ${a} → <b>${Math.min(4,a+1)}</b></small><small>P調教費 ${partnerFee(h,1)}枚</small>${chargeGauge(id)}</div><div><h3>素材（同じ株券）</h3><div class="mat-grid">${Array.from({length:Math.min(dup,12)},()=>`<div class="mat-cell on">${cardBadge(h)}<b>${esc(h.name)}</b></div>`).join('')||'<p>重複している株券がありません。</p>'}</div><button class="gold" ${a<4&&dup>0?'':'disabled'} onclick="awaken('${id}');mergeScreen('${id}')">合成する</button>${a>=4?'<p>最大覚醒です。</p>':''}</div></div><button onclick="stockView('${id}')">詳細へ戻る</button>`,'閉じる');
 }
 
 /* ===== 第13弾：監査§3（調教・飼葉・トレセン・パートナー・農園・神社） ===== */
